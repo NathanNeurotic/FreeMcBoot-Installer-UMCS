@@ -205,7 +205,7 @@ static struct InstallationFile SysResourceFiles[SYS_FOLDER_RESOURCES_NUM_FILES] 
      "BREXEC-SYSTEM/icon.sys",
      0}};
 
-#define BASE_INSTALL_NUM_FILES 7
+#define BASE_INSTALL_NUM_FILES 2
 static struct InstallationFile BaseFiles[BASE_INSTALL_NUM_FILES] = {
     {"SYS-CONF/USBHDFSD.IRX",
      "SYS-CONF/USBHDFSD.IRX",
