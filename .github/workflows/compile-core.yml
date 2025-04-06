@@ -38,7 +38,7 @@ jobs:
           chmod +x ./pack.sh
           ./pack.sh
           mkdir -p ../release_artifacts
-          mv FMCB*.7z ../release_artifacts/
+          mv ../FMCB*.7z ../release_artifacts/
 
       - name: Upload artifact
         if: success()
