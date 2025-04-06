@@ -9,56 +9,47 @@ on:
       - '.github/workflows/compile-core.yml'
   schedule:
     - cron: "0 15 1 * *"
-    
-    
+
 jobs:
   build-packages:
     runs-on: ubuntu-latest
     container: ps2dev/ps2dev:v1.0
     steps:
-    - name: Install dependencies
-      run: |
-        apk add build-base git zip p7zip
+      - name: Install dependencies
+        run: apk add --no-cache build-base git zip p7zip
 
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    - run: |
-        git config --global --add safe.directory "$GITHUB_WORKSPACE"
-        git fetch
+      - name: Set short SHA environment variable
+        run: |
+          echo "SHA8=${GITHUB_SHA::8}" >> $GITHUB_ENV
 
-    - name: Get short SHA
-      id: slug
-      run: echo "SHA8=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_ENV
+      - name: Compile
+        working-directory: installer
+        run: |
+          make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/
+          make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/ EXFAT=1
 
-    - name: Compile
-      run: |
-        cd installer
-        make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/ 
-        make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/ EXFAT=1
+      - name: Prepare folder for Release
+        working-directory: installer_res
+        run: |
+          chmod +x ./pack.sh
+          ./pack.sh
 
-    - name: Prepare folder for Release
-      run: |
-        cd installer_res
-        ls
-        chmod +x ./pack.sh
-        ./pack.sh
+      - name: Upload artifact
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: FMCB-${{ env.SHA8 }}
+          path: installer_res/FMCB*.7z
 
-    - name: Upload artifact
-      if: ${{ success() }}
-      uses: actions/upload-artifact@v3
-      with:
-        name: FMCB-${{ env.SHA8 }}
-        path: |
-            FMCB*.7z
-
-    - name: Create release
-      if: github.ref == 'refs/heads/master'
-      uses: marvinpinto/action-automatic-releases@latest
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
-        title: "FreeMcBoot"
-        files: |
-            FMCB*.7z
+      - name: Create release
+        if: github.ref == 'refs/heads/master'
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          title: "FreeMcBoot"
+          files: installer_res/FMCB*.7z
