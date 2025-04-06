@@ -1670,11 +1670,61 @@ int PerformInstallation(unsigned char port, unsigned char slot, unsigned int fla
             }
         }
         if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "APP_NHDDL", "APP_NHDDL", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (APP_NHDDL) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "APP_OPL", "APP_OPL", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (APP_OPL) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "BOOT", "BOOT", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (BOOT) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "FMCBD-1.953", "FMCBD-1.953", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (FMCBD-1.953) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "FMCBD-1.966", "FMCBD-1.966", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (FMCBD-1.966) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "OSDMENU", "OSDMENU", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (OSDMENU) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "POPSTARTER", "POPSTARTER", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (POPSTARTER) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "POWEROFF", "POWEROFF", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (POWEROFF) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "PS1_DKWDRV", "PS1_DKWDRV", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (PS1_DKWDRV) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "SYS-CONF", "SYS-CONF", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
                 DEBUG_PRINTF("AddDirContentsToFileCopyList (SYS-CONF) failed: %d\n", result);
             }
         }
-
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "SYS_FMCB-CFG", "SYS_FMCB-CFG", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (SYS_FMCB-CFG) failed: %d\n", result);
+            }
+        }
+        
         // Calculate available and required space.
         TotalRequiredSpace = CalculateRequiredSpace(FileCopyList, NumFiles, NumDirectories);
         // I do not like this, but the Sony documentation implies that we can (And have to?) assume that the memory card has a cluster size of 2.
