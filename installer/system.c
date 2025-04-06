@@ -196,10 +196,10 @@ static struct InstallationFile PSXSysFiles[PSX_SYS_INSTALL_NUM_FILES] = {
 #define SYS_FOLDER_RESOURCES_NUM_FILES 3
 static struct InstallationFile SysResourceFiles[SYS_FOLDER_RESOURCES_NUM_FILES] = {
     {"SYSTEM/FMCB.ICN",
-     "BREXEC-SYSTEM/FMCB.icn",
+     "BREXEC-SYSTEM/PS2BBL.icn",
      0},
     {"SYSTEM/DELE.ICN",
-     "BREXEC-SYSTEM/DELE.icn",
+     "BREXEC-SYSTEM/delete.icn",
      0},
     {"SYSTEM/ICON.SYS",
      "BREXEC-SYSTEM/icon.sys",
@@ -207,24 +207,6 @@ static struct InstallationFile SysResourceFiles[SYS_FOLDER_RESOURCES_NUM_FILES] 
 
 #define BASE_INSTALL_NUM_FILES 7
 static struct InstallationFile BaseFiles[BASE_INSTALL_NUM_FILES] = {
-    {"SYS-CONF/FMCB_CFG.ELF",
-     "SYS-CONF/FMCB_CFG.ELF",
-     0},
-    {"SYS-CONF/FREEMCB.CNF",
-     "SYS-CONF/FREEMCB.CNF",
-     0},
-    {"SYS-CONF/icon.sys",
-     "SYS-CONF/icon.sys",
-     0},
-    {"SYS-CONF/sysconf.icn",
-     "SYS-CONF/sysconf.icn",
-     0},
-    {"SYS-CONF/del.icn",
-     "SYS-CONF/del.icn",
-     0},
-    {"SYS-CONF/USBD.IRX",
-     "SYS-CONF/USBD.IRX",
-     0},
     {"SYS-CONF/USBHDFSD.IRX",
      "SYS-CONF/USBHDFSD.IRX",
      0}};
