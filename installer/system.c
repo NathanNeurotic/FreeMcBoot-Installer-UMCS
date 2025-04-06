@@ -1670,16 +1670,6 @@ int PerformInstallation(unsigned char port, unsigned char slot, unsigned int fla
             }
         }
         if (result >= 0) {
-            if ((result = AddDirContentsToFileCopyList(RootFolder, "APP_NHDDL", "APP_NHDDL", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
-                DEBUG_PRINTF("AddDirContentsToFileCopyList (APP_NHDDL) failed: %d\n", result);
-            }
-        }
-        if (result >= 0) {
-            if ((result = AddDirContentsToFileCopyList(RootFolder, "APP_OPL", "APP_OPL", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
-                DEBUG_PRINTF("AddDirContentsToFileCopyList (APP_OPL) failed: %d\n", result);
-            }
-        }
-        if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "BOOT", "BOOT", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
                 DEBUG_PRINTF("AddDirContentsToFileCopyList (BOOT) failed: %d\n", result);
             }
