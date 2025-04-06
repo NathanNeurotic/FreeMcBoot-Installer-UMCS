@@ -198,7 +198,7 @@ static struct InstallationFile SysResourceFiles[SYS_FOLDER_RESOURCES_NUM_FILES] 
     {"SYSTEM/FMCB.ICN",
      "BREXEC-SYSTEM/PS2BBL.icn",
      0},
-    {"SYSTEM/DELE.ICN",
+    {"SYSTEM/DELE.icn",
      "BREXEC-SYSTEM/delete.icn",
      0},
     {"SYSTEM/ICON.SYS",
