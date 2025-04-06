@@ -47,12 +47,12 @@ jobs:
           name: FMCB-${{ env.SHA8 }}
           path: release_artifacts/FMCB*.7z
 
-      - name: Create release
-        if: github.ref == 'refs/heads/master'
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          title: "FreeMcBoot"
-          files: |
-            release_artifacts/FMCB*.7z
+#      - name: Create release
+#        if: github.ref == 'refs/heads/master'
+#        uses: marvinpinto/action-automatic-releases@latest
+#        with:
+#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+#          automatic_release_tag: "latest"
+#          title: "FreeMcBoot"
+#          files: |
+#            release_artifacts/FMCB*.7z
