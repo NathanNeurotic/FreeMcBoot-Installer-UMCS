@@ -599,6 +599,13 @@ static int CreateBasicFolders(int port, int slot, unsigned int flags)
         "APPS",
         "BOOT",
         "SYS-CONF",
+        "FMCBD-1.953",
+        "FMCBD-1.966",
+        "OSDMENU",
+        "POPSTARTER",
+        "POWEROFF",
+        "PS1_DKWDRV",
+        "SYS_FMCB-CFG",
         "\0"};
 
     for (i = 0, result = 0; folders[i][0] != '\0' && result >= 0; i++) {
