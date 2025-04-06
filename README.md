@@ -1,5 +1,83 @@
-# FreeMcBoot-Installer-Remapped
+# FreeMcBoot-Installer-UMCS-PS2BBL-MOD
+
 is a fork of El_isra's (https://israpps.github.io/) Custom FMCB Installer. (https://israpps.github.io/FreeMcBoot-Installer/)
+
+# Unified Memory Card System (UMCS) FreeMcBoot Installer
+### Alternative to [KELFBinder: UMCS](https://github.com/NathanNeurotic/KELFbinder-UMCS/releases/tag/latest)
+Works with or without [OpenTuna Installer: UMCS](https://github.com/NathanNeurotic/FreeMcTuna/releases/tag/UMCS-OPENTUNA-4eddc244)
+
+---
+
+## Overview
+This installer integrates the PS2 Browser Boot Loader (PS2BBL) exploit and provides decrypted FreeMcBoot (FMCB) boot options for PlayStation 2. Designed specifically for PS2 homebrew enthusiasts, this UMCS standard installation ensures streamlined and flexible system management.
+
+**Visionary:** [Tna-Plastic](https://github.com/TnA-Plastic)
+
+---
+
+## Features
+
+- **PS2BBL Integration:**
+  - Installs PS2BBL exploit directly from the installer menu.
+  - Leverages the full UMCS standard environment for comprehensive functionality.
+
+- **Multiple Boot Options:**
+  - FMCB-1.966 *(requires SYS_FMCB-CFG)*
+  - FMCB-1.953 *(requires SYS_FMCB-CFG and POWEROFF)*
+  - OSDMENU *(does not require SYS_FMCB-CFG or POWEROFF)*
+
+  *You can manually delete any boot options you do not need.*
+
+- **Emergency Access:**
+  - Hold `START` on system boot to directly access `wLaunchELF` in emergency mode.
+
+- **RESCUE ELF Access:**
+  - Press `R1 + START` on system boot to launch `RESCUE.ELF` for additional troubleshooting options.
+
+---
+
+## Optional Addition
+
+### OpenTuna Integration (Optional)
+You can optionally add OpenTuna for further system flexibility:
+
+- **OpenTuna UMCS:** [Download Here](https://github.com/NathanNeurotic/FreeMcTuna/releases/tag/UMCS-OPENTUNA-4eddc244)
+
+---
+
+## Installation Instructions
+
+1. Copy the entire UMCS installer folder (not just the ELF file) to a USB drive.
+2. Insert the USB drive into your PlayStation 2.
+3. Launch `wLaunchELF` on your PS2.
+4. Navigate to `FileBrowser -> mass:/` and locate the UMCS installer folder.
+5. Run the ELF file from within the folder to start the installer.
+6. From the installer menu, select the option to install the **PS2BBL exploit**.
+7. Follow the on-screen prompts to complete installation.
+8. Upon reboot, UMCS Standard will be fully operational.
+
+---
+
+## Notes
+- Ensure your memory card has sufficient free space.
+- Do **not** move or run the ELF independently; the installer relies on folder structure and included assets.
+- Carefully manage boot option deletions to maintain system stability.
+- Keep the emergency access and rescue keys handy for troubleshooting.
+
+---
+
+### Credits  
+Special thanks to the PS2 homebrew community and all contributors to the UMCS environment.
+
+- [KELFBinder](https://github.com/israpps/KELFbinder) by [israpps](https://github.com/israpps)  
+- [PS2BBL](https://israpps.github.io/PlayStation2-Basic-BootLoader/) by [israpps](https://github.com/israpps)  
+- [Free McBoot Installer](https://github.com/israpps/FreeMcBoot-Installer) by [israpps](https://github.com/israpps)  
+- [OSDMENU](https://github.com/pcm720/osdmenu-launcher) by [pcm720](https://github.com/pcm720)  
+- [ESR Launcher](https://www.psx-place.com/resources/esr-launcher.1526/) by [HowlingWolfChelseaFantasy](https://github.com/HowlingWolfHWC)  
+- [DKWDRV (Driver)](https://github.com/DKWDRV/DKWDRV)  
+- [POPStarter Wiki](https://bitbucket.org/ShaolinAssassin/popstarter-documentation-stuff/wiki/Home) by [ShaolinAssassin](https://github.com/shaolinassassin)
+
+
 Original Documentation:
 ----------------------
 # FreeMcBoot-Installer
