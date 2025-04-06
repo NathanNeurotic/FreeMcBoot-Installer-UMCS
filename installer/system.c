@@ -1684,6 +1684,11 @@ int PerformInstallation(unsigned char port, unsigned char slot, unsigned int fla
                 DEBUG_PRINTF("AddDirContentsToFileCopyList (APPS) failed: %d\n", result);
             }
         }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "SYS-CONF", "SYS-CONF", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (SYS-CONF) failed: %d\n", result);
+            }
+        }
 
         // Calculate available and required space.
         TotalRequiredSpace = CalculateRequiredSpace(FileCopyList, NumFiles, NumDirectories);
