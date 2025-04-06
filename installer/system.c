@@ -209,7 +209,7 @@ static struct InstallationFile SysResourceFiles[SYS_FOLDER_RESOURCES_NUM_FILES] 
 static struct InstallationFile BaseFiles[BASE_INSTALL_NUM_FILES] = {
     {"SYS-CONF/USBHDFSD.IRX",
      "SYS-CONF/USBHDFSD.IRX",
-     0}
+     0},
      {"SYS-CONF/FREEMCB.CNF",
      "SYS-CONF/FREEMCB.CNF",
      0}};
