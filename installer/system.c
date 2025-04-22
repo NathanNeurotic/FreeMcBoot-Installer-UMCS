@@ -205,13 +205,10 @@ static struct InstallationFile SysResourceFiles[SYS_FOLDER_RESOURCES_NUM_FILES] 
      "BREXEC-SYSTEM/icon.sys",
      0}};
 
-#define BASE_INSTALL_NUM_FILES 2
+#define BASE_INSTALL_NUM_FILES 1
 static struct InstallationFile BaseFiles[BASE_INSTALL_NUM_FILES] = {
-    {"SYS-CONF/USBHDFSD.IRX",
-     "SYS-CONF/USBHDFSD.IRX",
-     0},
-     {"SYS-CONF/FREEMCB.CNF",
-     "SYS-CONF/FREEMCB.CNF",
+    {"SYS-CONF/OSDMENU.CNF",
+     "SYS-CONF/OSDMENU.CNF",
      0}};
 
 #define HDD_BASE_INSTALL_NUM_FILES 22
@@ -599,13 +596,13 @@ static int CreateBasicFolders(int port, int slot, unsigned int flags)
         "APPS",
         "BOOT",
         "SYS-CONF",
-        "FMCBD-1.953",
-        "FMCBD-1.966",
-        "OSDMENU",
-        "POPSTARTER",
-        "POWEROFF",
-        "PS1_DKWDRV",
-        "SYS_FMCB-CFG",
+        "OSDMENU-LAUNCHER",
+        "NEUTRINO",
+        "NEUTRINO/modules",
+        "NEUTRINO/config",
+        "APP_NHDDL",
+        "APP_OPL",
+        "APP_ESR-LAUNCHER",
         "\0"};
 
     for (i = 0, result = 0; folders[i][0] != '\0' && result >= 0; i++) {
