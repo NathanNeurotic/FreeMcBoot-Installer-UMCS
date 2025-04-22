@@ -22,9 +22,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set short SHA environment variable
+      - name: Generate build metadata
         run: |
           echo "SHA8=${GITHUB_SHA::8}" >> $GITHUB_ENV
+          echo "BUILD_TS=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
       - name: Compile
         run: |
@@ -38,21 +39,37 @@ jobs:
           chmod +x ./pack.sh
           ./pack.sh
           mkdir -p ../release_artifacts
-          mv ../FMCB*.7z ../release_artifacts/
+          mv ../FMCB*.7z ../release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
 
       - name: Upload artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: FMCB-${{ env.SHA8 }}
-          path: release_artifacts/FMCB*.7z
+          path: release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+
+      - name: Generate changelog since last tag
+        id: changelog
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "")
+          echo "Last tag was: $LAST_TAG"
+          echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
+          if [ -n "$LAST_TAG" ]; then
+            git log $LAST_TAG..HEAD --pretty=format:"- %s (%h) by %an" >> $GITHUB_ENV
+          else
+            git log --pretty=format:"- %s (%h) by %an" >> $GITHUB_ENV
+          fi
+          echo 'EOF' >> $GITHUB_ENV
 
       - name: Create release
-        if: github.ref == 'refs/heads/master'
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          title: "FreeMcBoot"
+          automatic_release_tag: "OSDMenu"
+          prerelease: false
+          title: "OSDMenu Installer"
           files: |
-            release_artifacts/FMCB*.7z
+            release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+          body: |
+            ### Recent Changes:
+            ${{ env.RELEASE_BODY }}
