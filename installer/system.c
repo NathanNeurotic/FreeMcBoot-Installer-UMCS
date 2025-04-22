@@ -1681,6 +1681,7 @@ int PerformInstallation(unsigned char port, unsigned char slot, unsigned int fla
         if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "OSDMENU-LAUNCHER", "OSDMENU-LAUNCHER", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
                 DEBUG_PRINTF("AddDirContentsToFileCopyList (OSDMENU-LAUNCHER) failed: %d\n", result);
+            }
         }
         if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "APP_NHDDL", "APP_NHDDL", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
