@@ -39,7 +39,7 @@ jobs:
           chmod +x ./pack.sh
           ./pack.sh
           mkdir -p ../release_artifacts
-          mv ../installer/FMCB-1966.7z ../release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+          mv ../FMCB-1966.7z ../release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
 
       - name: Upload artifact
         if: success()
