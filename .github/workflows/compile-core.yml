@@ -51,14 +51,19 @@ jobs:
       - name: Generate changelog since last tag
         id: changelog
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           LAST_TAG=$(git describe --tags --abbrev=0 || echo "")
           echo "Last tag was: $LAST_TAG"
-          echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
+
+          LOG_BODY=""
           if [ -n "$LAST_TAG" ]; then
-            git log $LAST_TAG..HEAD --pretty=format:"- %s (%h) by %an" >> $GITHUB_ENV
+            LOG_BODY="$(git log $LAST_TAG..HEAD --pretty=format:"- %s (%h) by %an")"
           else
-            git log --pretty=format:"- %s (%h) by %an" >> $GITHUB_ENV
+            LOG_BODY="$(git log --pretty=format:"- %s (%h) by %an")"
           fi
+
+          echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
+          echo "$LOG_BODY" >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
       - name: Create release
