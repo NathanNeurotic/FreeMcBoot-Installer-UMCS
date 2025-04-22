@@ -592,17 +592,17 @@ static int CreateBasicFolders(int port, int slot, unsigned int flags)
 {
     unsigned int i;
     int result;
-    char folders[][16] = {
+    char folders[][32] = {
         "APPS",
         "BOOT",
         "SYS-CONF",
         "OSDMENU-LAUNCHER",
         "NEUTRINO",
         "APP_NHDDL",
-        "NEUTRINO/modules",
         "APP_OPL",
-        "NEUTRINO/config",
         "APP_ESR-LAUNCHER",
+        "NEUTRINO/config",
+        "NEUTRINO/modules",
         "\0"};
 
     for (i = 0, result = 0; folders[i][0] != '\0' && result >= 0; i++) {
