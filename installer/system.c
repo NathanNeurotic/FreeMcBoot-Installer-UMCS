@@ -1681,12 +1681,6 @@ int PerformInstallation(unsigned char port, unsigned char slot, unsigned int fla
         if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "OSDMENU-LAUNCHER", "OSDMENU-LAUNCHER", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
                 DEBUG_PRINTF("AddDirContentsToFileCopyList (OSDMENU-LAUNCHER) failed: %d\n", result);
-            }
-        }
-        if (result >= 0) {
-            if ((result = AddDirContentsToFileCopyList(RootFolder, "NEUTRINO", "NEUTRINO", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
-                DEBUG_PRINTF("AddDirContentsToFileCopyList (NEUTRINO) failed: %d\n", result);
-            }
         }
         if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "APP_NHDDL", "APP_NHDDL", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
@@ -1701,6 +1695,11 @@ int PerformInstallation(unsigned char port, unsigned char slot, unsigned int fla
         if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "APP_ESR-LAUNCHER", "APP_ESR-LAUNCHER", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
                 DEBUG_PRINTF("AddDirContentsToFileCopyList (APP_ESR-LAUNCHER) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "NEUTRINO", "NEUTRINO", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (NEUTRINO) failed: %d\n", result);
             }
         }
         
