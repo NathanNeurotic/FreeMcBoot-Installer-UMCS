@@ -1,4 +1,0 @@
-﻿Programm beenden?
-Bitte warten...
-Gewähltes Gerät verfügt nicht über genügend freien Speicherplatz.
-Fehler beim Zugriff auf das Gerät.
