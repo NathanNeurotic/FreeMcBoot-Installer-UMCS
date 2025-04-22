@@ -1694,18 +1694,8 @@ int PerformInstallation(unsigned char port, unsigned char slot, unsigned int fla
             }
         }
         if (result >= 0) {
-            if ((result = AddDirContentsToFileCopyList(RootFolder, "NEUTRINO/modules", "NEUTRINO/modules", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
-                DEBUG_PRINTF("AddDirContentsToFileCopyList (NEUTRINO/modules) failed: %d\n", result);
-            }
-        }
-        if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "APP_OPL", "APP_OPL", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
                 DEBUG_PRINTF("AddDirContentsToFileCopyList (APP_OPL) failed: %d\n", result);
-            }
-        }
-        if (result >= 0) {
-            if ((result = AddDirContentsToFileCopyList(RootFolder, "NEUTRINO/config", "NEUTRINO/config", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
-                DEBUG_PRINTF("AddDirContentsToFileCopyList (NEUTRINO/config) failed: %d\n", result);
             }
         }
         if (result >= 0) {
