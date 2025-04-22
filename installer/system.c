@@ -593,14 +593,15 @@ static int CreateBasicFolders(int port, int slot, unsigned int flags)
     unsigned int i;
     int result;
     char folders[][32] = {
-        "APPS",
         "BOOT",
         "SYS-CONF",
         "OSDMENU-LAUNCHER",
         "NEUTRINO",
+        "APPS",
         "APP_NHDDL",
         "APP_OPL",
         "APP_ESR-LAUNCHER",
+        "POPSTARTER",
         "NEUTRINO/config",
         "NEUTRINO/modules",
         "\0"};
@@ -1669,11 +1670,6 @@ int PerformInstallation(unsigned char port, unsigned char slot, unsigned int fla
 
         // Add files in the APPS folder to the file list.
         if (result >= 0) {
-            if ((result = AddDirContentsToFileCopyList(RootFolder, "APPS", "APPS", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
-                DEBUG_PRINTF("AddDirContentsToFileCopyList (APPS) failed: %d\n", result);
-            }
-        }
-        if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "SYS-CONF", "SYS-CONF", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
                 DEBUG_PRINTF("AddDirContentsToFileCopyList (SYS-CONF) failed: %d\n", result);
             }
@@ -1681,6 +1677,11 @@ int PerformInstallation(unsigned char port, unsigned char slot, unsigned int fla
         if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "OSDMENU-LAUNCHER", "OSDMENU-LAUNCHER", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
                 DEBUG_PRINTF("AddDirContentsToFileCopyList (OSDMENU-LAUNCHER) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "APPS", "APPS", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (APPS) failed: %d\n", result);
             }
         }
         if (result >= 0) {
@@ -1696,6 +1697,11 @@ int PerformInstallation(unsigned char port, unsigned char slot, unsigned int fla
         if (result >= 0) {
             if ((result = AddDirContentsToFileCopyList(RootFolder, "APP_ESR-LAUNCHER", "APP_ESR-LAUNCHER", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
                 DEBUG_PRINTF("AddDirContentsToFileCopyList (APP_ESR-LAUNCHER) failed: %d\n", result);
+            }
+        }
+        if (result >= 0) {
+            if ((result = AddDirContentsToFileCopyList(RootFolder, "POPSTARTER", "POPSTARTER", 1, &FileCopyList, &NumFiles, &NumDirectories, &TotalRequiredSpaceForFiles)) < 0) {
+                DEBUG_PRINTF("AddDirContentsToFileCopyList (POPSTARTER) failed: %d\n", result);
             }
         }
         if (result >= 0) {
