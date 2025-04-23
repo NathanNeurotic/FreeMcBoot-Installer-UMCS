@@ -6,6 +6,26 @@ This package installs **PS2BBL** and **OSDMenu**, modified/created by @pcm720, t
 A collection of bundled tools and applications have also been included in the installer, so you can jump right in and play.
 It is **not** a UMCS or FMCB installer. It is forked from FMCB installer and compatible with UMCS additions.
 
+
+## 📦 How To Install
+
+1. **Download and extract** the `.7z` archive to your **FAT32 or exFAT** USB storage device.
+2. **Access the USB** from your PS2 using **uLaunchELF**, **wLaunchELF**, or **FDVDB**.
+3. **Launch the correct OSDMenu Installer ELF** for your USB format:
+   - Use the **FAT32** installer if your USB is formatted as FAT32.
+   - Use the **exFAT** installer if your USB is formatted as exFAT.
+4. Once inside the installer, **press `R1` twice** to open the **Format MC** menu.
+   - 🛑 *This step is strongly recommended and often required.*
+   - 💾 *Backup any memory card data you want to keep using wLaunchELF (copy from `mc?:/` to `mass:/`).*
+5. When you're ready, **format the Memory Card**.
+6. After formatting, **press `L1` twice** to return to the main installer menu.
+7. **Select “Install OSDMenu”**.
+8. Choose your preferred **PS2BBL coverage type**.
+9. Wait for the installer to finish.  
+   🕐 *It may take a while — the progress bar might appear stuck, but it’s working. Please be patient.*
+10. Once the installation is complete, **reboot your PS2** and enjoy the new setup.
+
+
 ## Overview
 
 - ✅ Installs **PS2BBL** + **OSDMenu** and a pre-configured environment  
@@ -102,38 +122,51 @@ arg=-testarg
 
 ---
 
-# 📝 OSDMENU.CNF Configuration
+## OSDMENU.CNF
 
-Fully compatible with FMCB 1.8 CNF. Extended with new options.
+Most of `OSDMENU.CNF` settings are directly compatible with those from FMCB 1.8 `FREEMCB.CNF`.
 
-### Entry Limits
+### Character limits
 
-- Max entries: 250  
-- Entry name: 79 characters  
-- Path: 49 characters  
-- Cursor text: 19 characters
+OSDMenu supports up to 250 custom menu entries, each up to 79 characters long.  
+Note that left and right cursors are limited to 19 characters and top and bottom delimiters are limited to 79 characters.  
+Launcher and DKWDRV paths are limited to 49 characters.
 
-### Settings
+### Configuration options
 
-```ini
-OSDSYS_video_mode=AUTO     ; AUTO | PAL | NTSC | 480p | 1080i
-hacked_OSDSYS=1
-OSDSYS_scroll_menu=1
-OSDSYS_menu_x=...
-OSDSYS_menu_y=...
-OSDSYS_cursor_max_velocity=...
-OSDSYS_selected_color=...
-OSDSYS_unselected_color=...
-name_OSDSYS_ITEM_001=...
-path0_OSDSYS_ITEM_001=...
-arg_OSDSYS_ITEM_001=...
-cdrom_skip_ps2logo=1
-cdrom_disable_gameid=1
-cdrom_use_dkwdrv=1
-path_LAUNCHER_ELF=mc?:/BOOT/launcher.elf
-path_DKWDRV_ELF=mc?:/BOOT/DKWDRV.ELF
-OSDSYS_Browser_Launcher=1
-```
+1. `OSDSYS_video_mode` — force OSDSYS mode. Valid values are `AUTO`, `PAL`, `NTSC`, `480p` or `1080i`
+2. `hacked_OSDSYS` — enables or disables OSDSYS patches
+3. `OSDSYS_scroll_menu` — enables or disables infinite scrolling
+4. `OSDSYS_menu_x` — menu X center coordinate
+5. `OSDSYS_menu_y` — menu Y center coordinate
+6. `OSDSYS_enter_x` — `Enter` button X coordinate (at main OSDSYS menu)
+7. `OSDSYS_enter_y` — `Enter` button Y coordinate (at main OSDSYS menu)
+8. `OSDSYS_version_x` — `Version` button X coordinate (at main OSDSYS menu)
+9. `OSDSYS_version_y` — `Version` button Y coordinate (at main OSDSYS menu)
+10. `OSDSYS_cursor_max_velocity` — max cursor speed
+11. `OSDSYS_cursor_acceleration` — cursor speed
+12. `OSDSYS_left_cursor` — left cursor text
+13. `OSDSYS_right_cursor` — right cursor text
+14. `OSDSYS_menu_top_delimiter` — top menu delimiter text
+15. `OSDSYS_menu_bottom_delimiter` — bottom menu delimiter text
+16. `OSDSYS_num_displayed_items` — the number of menu items displayed
+17. `OSDSYS_Skip_Disc` — enables/disables automatic CD/DVD launch
+18. `OSDSYS_Skip_Logo` — enables/disables SCE logo
+19. `OSDSYS_Inner_Browser` — enables/disables going to the Browser after launching OSDSYS
+20. `OSDSYS_selected_color` — color of selected menu entry
+21. `OSDSYS_unselected_color` — color of unselected menu entry
+22. `name_OSDSYS_ITEM_???` — menu entry name
+23. `path?_OSDSYS_ITEM_???` — path to ELF. Also supports the following special paths: `cdrom`, `OSDSYS`, `POWEROFF`
+
+New to this launcher:
+
+24. `arg_OSDSYS_ITEM_???` — custom argument to be passed to the ELF. Each argument needs a separate entry.
+25. `cdrom_skip_ps2logo` — enables or disables running discs via `rom0:PS2LOGO`. Useful for MechaPwn-patched consoles.
+26. `cdrom_disable_gameid` — disables or enables visual Game ID
+27. `cdrom_use_dkwdrv` — enables or disables launching DKWDRV for PS1 discs
+28. `path_LAUNCHER_ELF` — custom path to launcher.elf. The path MUST be on the memory card
+29. `path_DKWDRV_ELF` — custom path to DKWDRV.ELF. The path MUST be on the memory card
+30. `OSDSYS_Browser_Launcher` — enables/disables patch for launching applications from the Browser 
 
 ---
 
