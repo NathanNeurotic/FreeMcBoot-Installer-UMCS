@@ -634,6 +634,19 @@ static int CreateBasicFolders(int port, int slot, unsigned int flags)
         }
     }
 
+    // 🔽 Apply DupProhibit to NEUTRINO folder after all other folder creation succeeds
+    if (result >= 0) {
+        sceMcTblGetDir table;
+        table.AttrFile = sceMcFileAttrReadable | sceMcFileAttrWriteable |
+                         sceMcFileAttrExecutable | sceMcFileAttrSubdir |
+                         sceMcFileAttrDupProhibit | sceMcFile0400;
+
+        result = mcSetFileInfo(port, slot, "NEUTRINO", &table, sceMcFileInfoAttr);
+        if (result == 0) {
+            mcSync(0, NULL, &result);
+        }
+    }
+
     return result;
 }
 
