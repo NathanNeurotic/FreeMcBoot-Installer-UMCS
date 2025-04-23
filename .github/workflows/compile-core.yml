@@ -66,15 +66,15 @@ jobs:
           echo "$LOG_BODY" >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
-#      - name: Create release
-#        uses: marvinpinto/action-automatic-releases@latest
-#        with:
-#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-#          automatic_release_tag: "OSDMenu"
-#          prerelease: false
-#          title: "OSDMenu Installer"
-#          files: |
-#            release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
-#          body: |
-#            ### Recent Changes:
-#            ${{ env.RELEASE_BODY }}
+      - name: Create release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "OSDMenu"
+          prerelease: true
+          title: "OSDMenu Installer"
+          files: |
+            release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+          body: |
+            ### Recent Changes:
+            ${{ env.RELEASE_BODY }}
