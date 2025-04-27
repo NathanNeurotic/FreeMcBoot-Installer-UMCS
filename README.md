@@ -4,7 +4,7 @@
 
 This package installs **PS2BBL** and **OSDMenu**, modified/created by @pcm720, the most compatible and latest FMCB release.
 A collection of bundled tools and applications have also been included in the installer, so you can jump right in and play.
-It is **not** a UMCS or FMCB installer. It is forked from FMCB installer and compatible with UMCS additions.
+It is **not** a UMCS or FMCB installer. It is forked from FMCB installer and compatible with UMCS and SAS additions.
 
 
 ## 📦 How To Install
@@ -178,3 +178,4 @@ New to this launcher:
 - **@Maximus32** – smap_udpbd
 - **@israpps/Matías Israelson** – [PS2BBL](https://github.com/israpps/PlayStation2-Basic-BootLoader)
 - **@CosmicScale** – [RetroGEM PS2 Disc Launcher](https://github.com/CosmicScale/Retro-GEM-PS2-Disc-Launcher)
+- **OSDMenu Save Icon** - taken from "PS2 Dashboard" (https://skfb.ly/pnAyJ) by deaffrasiertheboy is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/). Merged with [@koraxial](https://github.com/koraxial)'s SAS icons.
