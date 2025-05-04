@@ -1,78 +1,40 @@
-name: Build [All]
+name: Build and Release
 
 on:
-  workflow_dispatch:
   push:
-    paths:
-      - 'installer/**'
-      - 'installer_res/**'
-      - '.github/workflows/compile-core.yml'
-  schedule:
-    - cron: "0 15 1 * *"
+    branches:
+      - Tuna
 
 jobs:
-  build-packages:
+  build:
     runs-on: ubuntu-latest
-    container: ps2dev/ps2dev:v1.0
     steps:
-      - name: Install dependencies
-        run: apk add --no-cache build-base git zip p7zip
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Set up PS2SDK environment
+        uses: ps2homebrew/setup-ps2dev@v1
 
-      - name: Generate build metadata
-        run: |
-          echo "SHA8=${GITHUB_SHA::8}" >> $GITHUB_ENV
-          echo "BUILD_TS=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
-
-      - name: Compile
+      - name: Build project
         run: |
           cd installer
-          make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/
-          make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/ EXFAT=1
+          make clean
+          make
 
-      - name: Prepare folder for Release
+      - name: Prepare artifacts
         run: |
-          cd installer_res
-          chmod +x ./pack.sh
-          ./pack.sh
-          mkdir -p ../release_artifacts
-          mv ../FMCB-1966.7z ../release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+          mkdir -p release_artifacts
+          cp installer/FreeMcBoot-Installer.elf release_artifacts/FreeMcBoot-Installer.elf
 
-      - name: Final repackage with correct folder structure and formats
+      - name: Repackage full source tree
         run: |
-          mkdir -p temp_release/PS2-Exploits-Installer-${SHA8}
-          cp -r installer installer_res .github Makefile temp_release/PS2-Exploits-Installer-${SHA8}/
-          cd temp_release
-          zip -r ../release_artifacts/PS2-Exploits-Installer-${SHA8}.zip PS2-Exploits-Installer-${SHA8}/
-          7z a ../release_artifacts/PS2-Exploits-Installer-${SHA8}.7z PS2-Exploits-Installer-${SHA8}/
-          tar -czvf ../release_artifacts/PS2-Exploits-Installer-${SHA8}.tar.gz PS2-Exploits-Installer-${SHA8}/
-          cd ..
-          rm -rf temp_release
+          7z a release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.zip ./installer ./installer_res ./mbr ./README.md ./Changelog.md
+          7z a release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.7z ./installer ./installer_res ./mbr ./README.md ./Changelog.md
+          tar -czf release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.tar.gz ./installer ./installer_res ./mbr ./README.md ./Changelog.md
 
-      - name: Upload artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: FMCB-${{ env.SHA8 }}
-          path: release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
-
-      - name: Generate changelog since last tag
-        id: changelog
+      - name: Generate changelog
         run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          LAST_TAG=$(git describe --tags --abbrev=0 || echo "")
-          echo "Last tag was: $LAST_TAG"
-
-          LOG_BODY=""
-          if [ -n "$LAST_TAG" ]; then
-            LOG_BODY="$(git log $LAST_TAG..HEAD --pretty=format:"- %s (%h) by %an")"
-          else
-            LOG_BODY="$(git log --pretty=format:"- %s (%h) by %an")"
-          fi
-
+          LOG_BODY="$(git log --pretty=format:'- %s (%h) by %an' -n 10)"
           echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
           echo "$LOG_BODY" >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
@@ -81,11 +43,21 @@ jobs:
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "OSDMenu"
-          prerelease: true
-          title: "OSDMenu Installer"
+          automatic_release_tag: "Tuna"
+          prerelease: false
+          title: "PS2-Exploits-Installer"
           files: |
-            release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
-        body: PS2BBL and/or OpenTuna AIO Installer.
+            release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.zip
+            release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.7z
+            release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.tar.gz
+          body: |
+            PS2BBL and/or OpenTuna AIO Installer.
+
+            Includes support for:
+            - OpenTuna exploit icon install with ROM-based selection
+            - PS2BBL + OSDMenu options
+            - Auto-deletes conflicting Tuna folders
+            - Timestamps: 12/31/2099 for compatibility
+
             ### Recent Changes:
             ${{ env.RELEASE_BODY }}
