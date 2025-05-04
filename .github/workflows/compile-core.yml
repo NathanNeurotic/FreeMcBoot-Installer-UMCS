@@ -39,45 +39,14 @@ jobs:
           chmod +x ./pack.sh
           ./pack.sh
           mkdir -p ../release_artifacts
-          mv ../FMCB-1966.7z ../release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+          mv ../FMCB-1966.7z ../release_artifacts/PS2-Exploits-Installer-${{ env.BUILD_TS }}.7z
 
       - name: Upload artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: FMCB-${{ env.SHA8 }}
-          path: release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
-
-      - name: Generate changelog since last tag
-        id: changelog
-        run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          LAST_TAG=$(git describe --tags --abbrev=0 || echo "")
-          echo "Last tag was: $LAST_TAG"
-
-          LOG_BODY=""
-          if [ -n "$LAST_TAG" ]; then
-            LOG_BODY="$(git log $LAST_TAG..HEAD --pretty=format:"- %s (%h) by %an")"
-          else
-            LOG_BODY="$(git log --pretty=format:"- %s (%h) by %an")"
-          fi
-
-          echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
-          echo "$LOG_BODY" >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-
-      - name: Repackage full source tree
-        run: |
-          7z a release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.zip ./installer ./installer_res ./mbr ./README.md ./Changelog.md
-          7z a release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.7z ./installer ./installer_res ./mbr ./README.md ./Changelog.md
-          tar -czf release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.tar.gz ./installer ./installer_res ./mbr ./README.md ./Changelog.md
-
-      - name: Generate changelog
-        run: |
-          LOG_BODY="$(git log --pretty=format:'- %s (%h) by %an' -n 10)"
-          echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
-          echo "$LOG_BODY" >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+          path: release_artifacts/PS2-Exploits-Installer-${{ env.BUILD_TS }}.7z
 
       - name: Create release
         uses: marvinpinto/action-automatic-releases@latest
@@ -94,10 +63,10 @@ jobs:
             PS2BBL and/or OpenTuna AIO Installer.
 
             Includes support for:
-            - OpenTuna exploit icon install with ROM-based selection
-            - PS2BBL + OSDMenu options
-            - Auto-deletes conflicting Tuna folders
-            - Timestamps: 12/31/2099 for compatibility
+            - OpenTuna exploit icon install with ROM-based auto detection
+            - PS2BBL + OSDMenu exploit system update install with Regional Option Installs
+            - Auto-deletes conflicting Tuna folders on Tuna install (Will add BOOT/BOOT.ELF enforcement later)
+            - Timestamps: 12/31/2099 for Tuna content.
 
             ### Recent Changes:
             ${{ env.RELEASE_BODY }}
