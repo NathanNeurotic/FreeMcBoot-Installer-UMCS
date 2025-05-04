@@ -14,9 +14,10 @@ jobs:
   build-packages:
     runs-on: ubuntu-latest
     container: ps2dev/ps2dev:v1.0
+
     steps:
       - name: Install dependencies
-        run: apk add --no-cache build-base git zip p7zip tar
+        run: apk add --no-cache build-base git zip p7zip
 
       - uses: actions/checkout@v4
         with:
@@ -28,44 +29,39 @@ jobs:
           echo "BUILD_TS=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
           echo "RELEASE_DIR=PS2-Exploits-Installer-${GITHUB_SHA::8}" >> $GITHUB_ENV
 
-      - name: Compile ELFs
+      - name: Compile ELF (FAT32 + EXFAT)
         run: |
           cd installer
           make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/
           make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/ EXFAT=1
-          cd ..
 
-      - name: Prepare release layout
+      - name: Build release folder layout
         run: |
           mkdir -p "release/${{ env.RELEASE_DIR }}/lang"
           mkdir -p "release/${{ env.RELEASE_DIR }}/INSTALL"
 
-          # Copy lang
+          # Copy language files
           cp -r installer_res/__base/lang/* "release/${{ env.RELEASE_DIR }}/lang/"
 
-          # Copy all INSTALL contents
+          # Copy INSTALL resources
           cp -r installer_res/1966/INSTALL/* "release/${{ env.RELEASE_DIR }}/INSTALL/"
 
-          # Copy compiled ELFs
-          cp installer_res/OSDMENU-INSTALLER-FAT32.ELF "release/${{ env.RELEASE_DIR }}/PS2-EXPLOITS-INSTALLER-FAT32.ELF"
-          cp installer_res/OSDMENU-INSTALLER-EXFAT.ELF "release/${{ env.RELEASE_DIR }}/PS2-EXPLOITS-INSTALLER-EXFAT.ELF"
+          # Rename and copy compiled ELFs
+          cp installer_res/FMCBInstaller.elf "release/${{ env.RELEASE_DIR }}/PS2-EXPLOITS-INSTALLER-FAT32.ELF"
+          cp installer_res/FMCBInstaller_EXFAT.elf "release/${{ env.RELEASE_DIR }}/PS2-EXPLOITS-INSTALLER-EXFAT.ELF"
 
           # Copy metadata
           cp README.md Changelog.md "release/${{ env.RELEASE_DIR }}/"
 
-      - name: Create archives
+      - name: Create .7z archive
         run: |
-          mkdir -p release_artifacts
-          cd release
-          zip -r "../release_artifacts/${{ env.RELEASE_DIR }}.zip" "${{ env.RELEASE_DIR }}"
-          7z a    "../release_artifacts/${{ env.RELEASE_DIR }}.7z"  "${{ env.RELEASE_DIR }}"
-          tar -czf "../release_artifacts/${{ env.RELEASE_DIR }}.tar.gz" "${{ env.RELEASE_DIR }}"
+          7z a -t7z "release/${{ env.RELEASE_DIR }}.7z" "./release/${{ env.RELEASE_DIR }}/*"
 
-      - name: Upload Artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: PS2-Exploits-Installer-${{ env.SHA8 }}
-          path: release_artifacts/
+          path: release/${{ env.RELEASE_DIR }}.7z
 
       - name: Generate changelog since last tag
         id: changelog
@@ -85,7 +81,7 @@ jobs:
           echo "$LOG_BODY" >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
-      - name: Create GitHub Release
+      - name: Publish release
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -93,9 +89,7 @@ jobs:
           prerelease: true
           title: "PS2-Exploits-Installer"
           files: |
-            release_artifacts/${{ env.RELEASE_DIR }}.zip
-            release_artifacts/${{ env.RELEASE_DIR }}.7z
-            release_artifacts/${{ env.RELEASE_DIR }}.tar.gz
+            release/${{ env.RELEASE_DIR }}.7z
           body: |
-            ### Recent Changes:
+            ### What's new:
             ${{ env.RELEASE_BODY }}
