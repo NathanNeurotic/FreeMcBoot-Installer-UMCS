@@ -1,0 +1,10 @@
+
+1953/__Package/FMCBInstaller.elf
+1965/__Package/FMCBInstaller.elf
+1966/__Package/FMCBInstaller.elf
+**.o
+**.BAK
+MASS/APPS/APP_LIST.sh
+MASS/APPS/applist.ini
+MASS/APPS/ISR.ETL
+.vscode/*
