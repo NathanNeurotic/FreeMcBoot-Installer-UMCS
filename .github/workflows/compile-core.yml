@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up PS2SDK environment
-        uses: ps2homebrew/setup-ps2dev@v1
+        uses: ps2homebrew/setup-ps2dev@master
 
       - name: Build project
         run: |
@@ -44,7 +44,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "Tuna"
-          prerelease: false
+          prerelease: true
           title: "PS2-Exploits-Installer"
           files: |
             release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.zip
