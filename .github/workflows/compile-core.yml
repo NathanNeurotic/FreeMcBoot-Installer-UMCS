@@ -16,7 +16,7 @@ jobs:
     container: ps2dev/ps2dev:v1.0
     steps:
       - name: Install dependencies
-        run: apk add --no-cache build-base git zip p7zip
+        run: apk add --no-cache build-base git zip p7zip tar
 
       - uses: actions/checkout@v4
         with:
@@ -26,29 +26,66 @@ jobs:
         run: |
           echo "SHA8=${GITHUB_SHA::8}" >> $GITHUB_ENV
           echo "BUILD_TS=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
+          echo "RELEASE_DIR=PS2-Exploits-Installer-${GITHUB_SHA::8}" >> $GITHUB_ENV
 
-      - name: Compile
+      - name: Compile ELFs
         run: |
           cd installer
           make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/
           make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/ EXFAT=1
+          cd ..
 
-      - name: Prepare folder for Release
+      - name: Prepare release layout
         run: |
-          cd installer_res
-          chmod +x ./pack.sh
-          ./pack.sh
-          mkdir -p ../release_artifacts
-          mv ../FMCB-1966.7z ../release_artifacts/PS2-Exploits-Installer-${{ env.BUILD_TS }}.7z
+          mkdir -p "release/${{ env.RELEASE_DIR }}/lang"
+          mkdir -p "release/${{ env.RELEASE_DIR }}/INSTALL"
 
-      - name: Upload artifact
-        if: success()
+          # Copy lang
+          cp -r installer_res/__base/lang/* "release/${{ env.RELEASE_DIR }}/lang/"
+
+          # Copy all INSTALL contents
+          cp -r installer_res/1966/INSTALL/* "release/${{ env.RELEASE_DIR }}/INSTALL/"
+
+          # Copy compiled ELFs
+          cp installer_res/OSDMENU-INSTALLER-FAT32.ELF "release/${{ env.RELEASE_DIR }}/PS2-EXPLOITS-INSTALLER-FAT32.ELF"
+          cp installer_res/OSDMENU-INSTALLER-EXFAT.ELF "release/${{ env.RELEASE_DIR }}/PS2-EXPLOITS-INSTALLER-EXFAT.ELF"
+
+          # Copy metadata
+          cp README.md Changelog.md "release/${{ env.RELEASE_DIR }}/"
+
+      - name: Create archives
+        run: |
+          mkdir -p release_artifacts
+          cd release
+          zip -r "../release_artifacts/${{ env.RELEASE_DIR }}.zip" "${{ env.RELEASE_DIR }}"
+          7z a    "../release_artifacts/${{ env.RELEASE_DIR }}.7z"  "${{ env.RELEASE_DIR }}"
+          tar -czf "../release_artifacts/${{ env.RELEASE_DIR }}.tar.gz" "${{ env.RELEASE_DIR }}"
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FMCB-${{ env.SHA8 }}
-          path: release_artifacts/PS2-Exploits-Installer-${{ env.BUILD_TS }}.7z
+          name: PS2-Exploits-Installer-${{ env.SHA8 }}
+          path: release_artifacts/
 
-      - name: Create release
+      - name: Generate changelog since last tag
+        id: changelog
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "")
+          echo "Last tag was: $LAST_TAG"
+
+          LOG_BODY=""
+          if [ -n "$LAST_TAG" ]; then
+            LOG_BODY="$(git log $LAST_TAG..HEAD --pretty=format:"- %s (%h) by %an")"
+          else
+            LOG_BODY="$(git log --pretty=format:"- %s (%h) by %an")"
+          fi
+
+          echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
+          echo "$LOG_BODY" >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+
+      - name: Create GitHub Release
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -56,17 +93,9 @@ jobs:
           prerelease: true
           title: "PS2-Exploits-Installer"
           files: |
-            release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.zip
-            release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.7z
-            release_artifacts/PS2-Exploits-Installer-${{ github.sha }}.tar.gz
+            release_artifacts/${{ env.RELEASE_DIR }}.zip
+            release_artifacts/${{ env.RELEASE_DIR }}.7z
+            release_artifacts/${{ env.RELEASE_DIR }}.tar.gz
           body: |
-            PS2BBL and/or OpenTuna AIO Installer.
-
-            Includes support for:
-            - OpenTuna exploit icon install with ROM-based auto detection
-            - PS2BBL + OSDMenu exploit system update install with Regional Option Installs
-            - Auto-deletes conflicting Tuna folders on Tuna install (Will add BOOT/BOOT.ELF enforcement later)
-            - Timestamps: 12/31/2099 for Tuna content.
-
             ### Recent Changes:
             ${{ env.RELEASE_BODY }}
