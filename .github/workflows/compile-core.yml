@@ -1,30 +1,70 @@
-name: Build and Release
+name: Build [All]
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - Tuna
+    paths:
+      - 'installer/**'
+      - 'installer_res/**'
+      - '.github/workflows/compile-core.yml'
+  schedule:
+    - cron: "0 15 1 * *"
 
 jobs:
-  build:
+  build-packages:
     runs-on: ubuntu-latest
+    container: ps2dev/ps2dev:v1.0
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: apk add --no-cache build-base git zip p7zip
 
-      - name: Set up PS2SDK environment
-        uses: ps2homebrew/setup-ps2dev@master
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Build project
+      - name: Generate build metadata
+        run: |
+          echo "SHA8=${GITHUB_SHA::8}" >> $GITHUB_ENV
+          echo "BUILD_TS=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
+
+      - name: Compile
         run: |
           cd installer
-          make clean
-          make
+          make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/
+          make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/ EXFAT=1
 
-      - name: Prepare artifacts
+      - name: Prepare folder for Release
         run: |
-          mkdir -p release_artifacts
-          cp installer/FreeMcBoot-Installer.elf release_artifacts/FreeMcBoot-Installer.elf
+          cd installer_res
+          chmod +x ./pack.sh
+          ./pack.sh
+          mkdir -p ../release_artifacts
+          mv ../FMCB-1966.7z ../release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+
+      - name: Upload artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FMCB-${{ env.SHA8 }}
+          path: release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+
+      - name: Generate changelog since last tag
+        id: changelog
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "")
+          echo "Last tag was: $LAST_TAG"
+
+          LOG_BODY=""
+          if [ -n "$LAST_TAG" ]; then
+            LOG_BODY="$(git log $LAST_TAG..HEAD --pretty=format:"- %s (%h) by %an")"
+          else
+            LOG_BODY="$(git log --pretty=format:"- %s (%h) by %an")"
+          fi
+
+          echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
+          echo "$LOG_BODY" >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
       - name: Repackage full source tree
         run: |
