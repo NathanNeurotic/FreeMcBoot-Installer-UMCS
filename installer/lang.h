@@ -1,30 +1,30 @@
 #ifndef __LANG_H__
 #define __LANG_H__
 
-// Language IDs - Based on the an official language codes list.
-enum LANGUAGE_ID{
-	LANGUAGE_JAPANESE = 0,
-	LANGUAGE_ENGLISH,
-	LANGUAGE_FRENCH,
-	LANGUAGE_SPANISH,
-	LANGUAGE_GERMAN,
-	LANGUAGE_ITALIAN,
-	LANGUAGE_DUTCH,
-	LANGUAGE_PORTUGUESE,
+// Language IDs - Renamed to avoid conflict with osd_config.h
+// These are used by UI.c's GetCurrentLanguage/SetCurrentLanguage and LoadLanguageStrings
+enum FMCB_LANGUAGE_ID { // Renamed from LANGUAGE_ID
+	FMCB_LANG_JAPANESE = 0, // Renamed from LANGUAGE_JAPANESE
+	FMCB_LANG_ENGLISH,      // Renamed from LANGUAGE_ENGLISH
+	FMCB_LANG_FRENCH,       // Renamed from LANGUAGE_FRENCH
+	FMCB_LANG_SPANISH,      // Renamed from LANGUAGE_SPANISH
+	FMCB_LANG_GERMAN,       // Renamed from LANGUAGE_GERMAN
+	FMCB_LANG_ITALIAN,      // Renamed from LANGUAGE_ITALIAN
+	FMCB_LANG_DUTCH,        // Renamed from LANGUAGE_DUTCH
+	FMCB_LANG_PORTUGUESE,   // Renamed from LANGUAGE_PORTUGUESE
 	//New languages can be added here.
-	//At the moment, the font character mapping is designed for English, French, Spanish, German, Italian, Dutch and Portuguese.
 	//The font contains all characters required for these languages.
 	//If new languages like Russian and Chinese are to be supported, then new fonts must be added.
 	//The English language strings are used as the default.
 
-	LANG_COUNT
+	FMCB_LANG_COUNT         // Renamed from LANG_COUNT, represents the number of supported languages
 };
 
 // String IDs
 // These are IDs for strings that will be retrieved with GetString().
 // New messages must be added before SYS_UI_MSG_COUNT.
 enum SYS_UI_MSG_ID{
-	SYS_UI_MSG_INSTALL_NORMAL_DESC = 0, // This was the first in your provided lang.h
+	SYS_UI_MSG_INSTALL_NORMAL_DESC = 0, 
 	SYS_UI_MSG_INSTALL_MULTI_DESC,
 	SYS_UI_MSG_CLEANUP_DESC,
 	SYS_UI_MSG_CLEANUP_MULTI_DESC,
@@ -35,7 +35,7 @@ enum SYS_UI_MSG_ID{
 	SYS_UI_MSG_CLEANUP_FHDB_DESC,
 	SYS_UI_MSG_INSTALL_CROSS_PSX_DESC,
 	SYS_UI_MSG_FORMAT_HDD_DESC,
-	SYS_UI_MSG_EXIT_DESC, // This was the last of the original "description" like messages
+	SYS_UI_MSG_EXIT_DESC, 
 
 	SYS_UI_MSG_PROMPT_CONTINUE,
 	SYS_UI_MSG_PROMPT_INSTALL_NORMAL,
@@ -78,16 +78,15 @@ enum SYS_UI_MSG_ID{
 	SYS_UI_MSG_NO_SPACE_HDD,
 	SYS_UI_MSG_NO_SPACE_HDD_APPS,
 	SYS_UI_MSG_LOADING_LANG,
-	SYS_UI_MSG_UNSUPP_CONSOLE, // For FHDB
-	SYS_UI_MSG_NO_HDD,         // For FHDB
-	SYS_UI_MSG_HDD_CORRUPTED,  // For FHDB
+	SYS_UI_MSG_UNSUPP_CONSOLE, 
+	SYS_UI_MSG_NO_HDD,         
+	SYS_UI_MSG_HDD_CORRUPTED,  
 	SYS_UI_MSG_PLEASE_WAIT,
 
-	SYS_UI_MSG_QUIT_DUMPING,   // Confirm quit dumping MC
-	SYS_UI_MSG_QUIT_RESTORING, // Confirm quit restoring MC
+	SYS_UI_MSG_QUIT_DUMPING,   
+	SYS_UI_MSG_QUIT_RESTORING, 
 
 	// Description strings for main menu items (referenced in menu.c MainMenuUpdateCallback)
-	// These were already present in your lang_h_final_with_desc artifact
 	SYS_UI_MSG_DSC_INST_FMCB,
 	SYS_UI_MSG_DSC_MI_FMCB,
 	SYS_UI_MSG_DSC_UINST_FMCB,
@@ -101,7 +100,7 @@ enum SYS_UI_MSG_ID{
 	SYS_UI_MSG_DSC_FORMAT_HDD,
 	SYS_UI_MSG_DSC_QUIT,
 
-	// OpenTuna Installer Messages (already present in your lang_h_final_with_desc artifact)
+	// OpenTuna Installer Messages 
 	SYS_UI_MSG_OT_AUTO_START,
 	SYS_UI_MSG_OT_MANUAL_SELECT_PAYLOAD,
 	SYS_UI_MSG_OT_CLEANUP_START,
@@ -116,15 +115,10 @@ enum SYS_UI_MSG_ID{
 	SYS_UI_MSG_OT_AUTO_CONFIRM,
 	SYS_UI_MSG_OT_MANUAL_CONFIRM,
 	SYS_UI_MSG_OT_CLEANUP_CONFIRM,
-	// SYS_UI_MSG_DSC_OPENTUNA_INSTALLER was here, but it's better placed with other descriptions
-	// if it's meant for the main menu callback. Let's ensure it's grouped correctly.
-	// Re-adding it here for clarity, ensure it's before the block of "Original FMCB Installer messages"
-	// if that block is indeed meant to be at the very end before SYS_UI_MSG_COUNT.
-	// Based on your artifact lang_h_final_with_desc, DSC_OPENTUNA_INSTALLER was the last of the "new" block.
-
+	
 	SYS_UI_MSG_DSC_OPENTUNA_INSTALLER, // Description for OpenTuna Installer main menu item
 
-	// Original FMCB Installer messages that were after the block of descriptions in your artifact
+	// Original FMCB Installer messages that were after the block of descriptions
 	SYS_UI_MSG_MULTI_WARN,
 	SYS_UI_MSG_QUIT,
 	SYS_UI_MSG_FORMAT_HDD_MANUAL,
@@ -183,7 +177,7 @@ enum SYS_UI_LBL_ID{
 	SYS_UI_LBL_WAIT,    
 	SYS_UI_LBL_NOTICE,  
 	
-	// Standard FMCB Labels (as per fetched lang.c, assuming names match intent)
+	// Standard FMCB Labels
 	SYS_UI_LBL_SLOT1,
 	SYS_UI_LBL_SLOT2,
 	SYS_UI_LBL_MEMORY_CARD, 
@@ -211,7 +205,7 @@ enum SYS_UI_LBL_ID{
 	SYS_UI_LBL_KB,
 	SYS_UI_LBL_MB,
 	SYS_UI_LBL_GB,
-	SYS_UI_LBL_TB,
+	SYS_UI_LBL_TB, 
 	SYS_UI_LBL_BPS,  
 	SYS_UI_LBL_KBPS, 
 	SYS_UI_LBL_MBPS, 
@@ -227,7 +221,7 @@ enum SYS_UI_LBL_ID{
 	SYS_UI_LBL_INST_TYPE_CRS_MDL,  
 	SYS_UI_LBL_INST_TYPE_CRS_REG,  
 
-	// OpenTuna Installer Labels (already present in your lang_h_final_with_desc artifact)
+	// OpenTuna Installer Labels
 	SYS_UI_LBL_OT_MENU_TITLE,
 	SYS_UI_LBL_OT_ITEM_AUTO,
 	SYS_UI_LBL_OT_ITEM_MANUAL,
@@ -240,15 +234,16 @@ enum SYS_UI_LBL_ID{
 	SYS_UI_LBL_COUNT // This must be the last one!
 };
 
-// Function Prototypes (already present in your lang_h_final_with_desc artifact)
+// Function Prototypes
 const char *GetString(unsigned int StrID); 
 const char *GetUILabel(unsigned int LblID); 
 
-int LoadLanguageStrings(unsigned int language); 
+int LoadLanguageStrings(unsigned int languageId); // Changed parameter name for clarity
 int LoadDefaultLanguageStrings(void); 
 void UnloadLanguage(void); 
 
 int GetCurrentLanguage(void);
-void SetCurrentLanguage(int languageID); 
+// Changed parameter name for clarity and to match the new enum name
+void SetCurrentLanguage(enum FMCB_LANGUAGE_ID languageId); 
 
 #endif /* __LANG_H__ */
