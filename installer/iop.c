@@ -1,22 +1,22 @@
 #include <iopcontrol.h>
 #include <iopcontrol_special.h> // For SifIopRebootBuffer
 #include <iopheap.h>
-#include <kernel.h>         // For SleepThread, CreateSema, SignalSema, ExitDeleteThread, SysCreateThread, etc.
+#include <kernel.h>         // For SleepThread, CreateSema, SignalSema, ExitDeleteThread, SysCreateThread, ee_sema_t etc.
 #include <libcdvd.h>
 #include <libmc.h>
 #include <libpwroff.h>      // For poweroffInit, poweroffSetCallback
 #include <loadfile.h>       // For SifExecModuleBuffer, SifLoadFileInit/Exit
-#include <libpad.h>         // For padInit, padPortOpen/Close, padEnd (though we use local pad.h wrappers)
+#include <libpad.h>         // For some pad constants if not in local pad.h (though local pad.h is preferred for functions)
 #include <sbv_patches.h>
 #include <sifrpc.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h>          // For NULL if not in other headers, and for general C std functions
+#include <string.h>         // For memset, etc.
 #include <fileXio_rpc.h>    // For fileXioInit, fileXioExit
 
 // FMCB Project Specific Includes
-#include "main.h"           // For DEBUG_PRINTF, EXFAT define, poweroffCallback
+#include "main.h"           // For DEBUG_PRINTF, EXFAT define, poweroffCallback (needs to be declared if used here)
 #include "iop.h"            // For IOP_MOD_ flags, IopInitStart, IopDeinit
-#include "system.h"         // Potentially for system-specific functions (not directly used here but good practice)
+// #include "system.h"      // Not directly used by iop.c functions themselves, but good for context
 #include "pad.h"            // <<< ADDED: For PadInitPads, PadDeinitPads
 #include "libsecr.h"        // <<< ADDED: For SecrInit, SecrDeinit
 #include "mctools_rpc.h"    // <<< ADDED: For InitMCTOOLS, DeinitMCTOOLS
@@ -58,6 +58,11 @@ struct SystemInitParams
     unsigned int flags;
 };
 
+// poweroffCallback is defined in main.c, so it needs to be declared extern here if iop.c calls it.
+// However, iop.c's IopInitStart calls poweroffSetCallback, which takes a function pointer.
+// The actual poweroffCallback from main.c is passed by main.c when it calls IopInitStart or related functions.
+// So, no direct extern declaration of poweroffCallback is needed in iop.c itself.
+
 static void SystemInitThread(struct SystemInitParams *SystemInitParams)
 {
     static const char PFS_args[] = "-n\0"
@@ -75,12 +80,12 @@ static void SystemInitThread(struct SystemInitParams *SystemInitParams)
 
     if (SystemInitParams->flags & IOP_MOD_SECRSIF) {
         SifExecModuleBuffer(SECRSIF_irx, size_SECRSIF_irx, 0, NULL, NULL);
-        SecrInit(); // Declaration should be in libsecr.h or secrman.h (if module specific)
+        SecrInit(); 
     }
 
     if (SystemInitParams->flags & IOP_MOD_MCTOOLS) {
         SifExecModuleBuffer(MCTOOLS_irx, size_MCTOOLS_irx, 0, NULL, NULL);
-        InitMCTOOLS(); // Declaration should be in mctools_rpc.h
+        InitMCTOOLS(); 
     }
 
     SifExitIopHeap();
@@ -100,44 +105,43 @@ int IopInitStart(unsigned int flags)
     if (!(flags & IOP_REBOOT)) {
         SifInitRpc(0);
     } else {
-        PadDeinitPads();    // Declaration in local pad.h
+        PadDeinitPads();    
         sceCdInit(SCECdEXIT);
-        DeinitMCTOOLS();    // Declaration in mctools_rpc.h
-        SecrDeinit();       // Declaration in libsecr.h or secrman.h
+        DeinitMCTOOLS();    
+        SecrDeinit();       
         fileXioExit();
     }
 
-    if (!(flags & IOP_LIBSECR_IMG)) { // Assuming this means standard IOP reset
+    if (!(flags & IOP_LIBSECR_IMG)) { 
         SifIopReset("", 0);
-    } else { // Assuming this means reset with a specific image (IOPRP.img)
+    } else { 
         SifIopRebootBuffer(IOPRP_img, size_IOPRP_img);
     }
 
     sema.init_count = 0;
     sema.max_count = 1;
-    sema.attr = 0; // Default attributes
+    sema.attr = 0; 
     sema.option = 0;
     InitThreadParams.InitCompleteSema = CreateSema(&sema);
     InitThreadParams.flags = flags;
 
-    while (!SifIopSync()) {}; // Wait for IOP to sync after reset/reboot
+    while (!SifIopSync()) {}; 
 
-    SifInitRpc(0);      // Re-initialize RPC after IOP reset
+    SifInitRpc(0);      
     SifInitIopHeap();
     SifLoadFileInit();
 
-    sbv_patch_enable_lmb(); // Kernel/sbv_patches.h
+    sbv_patch_enable_lmb(); 
 
-    // Load essential IOP modules
     SifExecModuleBuffer(IOMANX_irx, size_IOMANX_irx, 0, NULL, NULL);
     SifExecModuleBuffer(FILEXIO_irx, size_FILEXIO_irx, 0, NULL, NULL);
 
-    fileXioInit();      // Initialize FILEXIO RPC client
-    sceCdInit(SCECdINoD); // Initialize CDVDMAN without checking for disc
+    fileXioInit();      
+    sceCdInit(SCECdINoD); 
 
     SifExecModuleBuffer(POWEROFF_irx, size_POWEROFF_irx, 0, NULL, NULL);
     ret = SifExecModuleBuffer(DEV9_irx, size_DEV9_irx, 0, NULL, &stat);
-    dev9Loaded = (ret >= 0 && stat == 0); // dev9.irx must load and return RESIDENT END
+    dev9Loaded = (ret >= 0 && stat == 0); 
 
     SifExecModuleBuffer(SIO2MAN_irx, size_SIO2MAN_irx, 0, NULL, NULL);
     SifExecModuleBuffer(PADMAN_irx, size_PADMAN_irx, 0, NULL, NULL);
@@ -157,41 +161,35 @@ int IopInitStart(unsigned int flags)
     SifExecModuleBuffer(USBHDFSD_irx, size_USBHDFSD_irx, 0, NULL, NULL);
 #endif
 
-    // The original `sleep(5)` is problematic.
-    // PS2SDK uses `SleepThread()` (from kernel.h) for task yielding,
-    // or `DelayThread(microseconds)` (from timer.h, which needs timer_irx).
-    // A simple delay of 5 "somethings" is ambiguous.
-    // If it's a short delay for hardware init, a few VBlanks might be intended.
-    // Let's use SleepThread() to yield, or a short DelayThread if timer is available.
-    // Since timer_irx isn't loaded, SleepThread() is safer.
-    // If a 5-second delay was intended, it would be DelayThread(5 * 1000 * 1000).
-    // For now, just a short yield.
-    SleepThread(); // Yield execution, allows other threads/IOP to process.
-    SleepThread(); // Call a few times for a noticeable short delay if needed.
+    // Replaced ambiguous sleep(5) with SleepThread() calls for yielding.
+    SleepThread(); 
+    SleepThread();
     SleepThread();
     SleepThread();
     SleepThread();
 
+    SysCreateThread(SystemInitThread, SysInitThreadStack, SYSTEM_INIT_THREAD_STACK_SIZE, &InitThreadParams, 0x2); 
 
-    SysCreateThread(SystemInitThread, SysInitThreadStack, SYSTEM_INIT_THREAD_STACK_SIZE, &InitThreadParams, 0x2); // Priority 2
-
-    // Initialize EE-side components that rely on IOP modules
-    poweroffInit();                             // libpwroff.h
-    poweroffSetCallback(&poweroffCallback, NULL); // poweroffCallback is in main.c
-    mcInit(MC_TYPE_XMC);                        // libmc.h
-    PadInitPads();                              // local pad.h
+    poweroffInit();                             
+    // poweroffSetCallback is called from main.c, passing the actual callback function.
+    // No need to call it here unless iop.c defines its own callback.
+    // poweroffSetCallback(&poweroffCallback, NULL); // Assuming poweroffCallback is global or passed
+    
+    mcInit(MC_TYPE_XMC);                        
+    PadInitPads();                              
 
     return InitThreadParams.InitCompleteSema;
 }
 
 void IopDeinit(void)
 {
-    PadDeinitPads();    // local pad.h
+    PadDeinitPads();    
     sceCdInit(SCECdEXIT);
-    DeinitMCTOOLS();    // mctools_rpc.h
-    SecrDeinit();       // libsecr.h or secrman.h
+    DeinitMCTOOLS();    
+    SecrDeinit();       
 
     fileXioExit();
     SifExitRpc();
-    // SifExitCmd(); // SifExitCmd is usually called at the very end of main or by Exit()
+    // SifExitCmd(); // Usually called at the very end by main application or Exit()
 }
+

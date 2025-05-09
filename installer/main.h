@@ -2,7 +2,7 @@
 #define __MAIN_H__
 
 // FMCB Installer version will be defined by the Makefile via CFLAGS
-// #define FMCB_INSTALLER_VERSION "1.001-MOD-OpenTuna" // REMOVED THIS LINE
+// #define FMCB_INSTALLER_VERSION "1.001-MOD-OpenTuna" // THIS LINE SHOULD BE REMOVED OR COMMENTED OUT
 
 /* Debugging TTY output - comment out to disable */
 // #define DEBUG_TTY_FEEDBACK 

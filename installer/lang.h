@@ -238,12 +238,11 @@ enum SYS_UI_LBL_ID{
 const char *GetString(unsigned int StrID); 
 const char *GetUILabel(unsigned int LblID); 
 
-int LoadLanguageStrings(unsigned int languageId); // Changed parameter name for clarity
+int LoadLanguageStrings(enum FMCB_LANGUAGE_ID languageId); // MODIFIED parameter type
 int LoadDefaultLanguageStrings(void); 
 void UnloadLanguage(void); 
 
-int GetCurrentLanguage(void);
-// Changed parameter name for clarity and to match the new enum name
-void SetCurrentLanguage(enum FMCB_LANGUAGE_ID languageId); 
+int GetCurrentLanguage(void); // Should return enum FMCB_LANGUAGE_ID
+void SetCurrentLanguage(enum FMCB_LANGUAGE_ID languageId); // MODIFIED parameter type
 
 #endif /* __LANG_H__ */
