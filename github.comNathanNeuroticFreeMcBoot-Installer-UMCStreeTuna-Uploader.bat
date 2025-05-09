@@ -4,12 +4,12 @@ setlocal enabledelayedexpansion
 :: === CONFIGURATION ===
 set "REPO_URL=https://github.com/NathanNeurotic/FreeMcBoot-Installer-UMCS.git"
 set "BRANCH=Tuna"
-set "COMMIT_MSG=Automated upload to Tuna branch"
+set "COMMIT_MSG=FORCED: Overwriting Tuna with local state"
 
 echo.
-echo === PS2 Tuna Branch Uploader ===
+echo === PS2 Tuna Branch FORCE-UPLOADER ===
 
-:: === Ensure Git is installed ===
+:: === Check for Git ===
 where git >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Git is not installed or not in PATH.
@@ -19,43 +19,36 @@ if %errorlevel% neq 0 (
 
 :: === Check credential.helper ===
 for /f "tokens=*" %%h in ('git config --global credential.helper 2^>nul') do set "HELPER=%%h"
-
 if not defined HELPER (
-    echo [INFO] Git credential helper is not set.
-    echo Enabling Git Credential Manager Core...
-    git config --global credential.helper manager-core
-    echo Done. You will be prompted to log in on first push.
-) else (
-    echo Credential helper detected: %HELPER%
+    echo [INFO] Git credential helper not set. Enabling...
+    git config --global credential.helper manager
 )
 
-:: === Initialize Git if needed ===
+:: === Init if needed ===
 if not exist ".git" (
-    echo Initializing new Git repository...
+    echo Initializing Git repo...
     git init
 )
 
-:: === Add remote if missing ===
+:: === Set remote if missing ===
 git remote get-url origin >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Adding remote origin: %REPO_URL%
+    echo Setting remote origin: %REPO_URL%
     git remote add origin %REPO_URL%
-) else (
-    echo Remote origin already set.
 )
 
-:: === Switch to Tuna branch ===
+:: === Create or switch to local branch ===
 git rev-parse --verify %BRANCH% >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Creating branch %BRANCH%...
+    echo Creating local branch: %BRANCH%
     git checkout -b %BRANCH%
 ) else (
-    echo Switching to branch %BRANCH%...
+    echo Switching to branch: %BRANCH%
     git checkout %BRANCH%
 )
 
-:: === Stage, commit, and push ===
-echo Staging all changes...
+:: === Stage and commit ===
+echo Adding all files...
 git add -A
 
 git diff --cached --quiet
@@ -63,13 +56,20 @@ if %errorlevel% neq 0 (
     echo Committing changes...
     git commit -m "%COMMIT_MSG%"
 ) else (
-    echo No changes to commit.
+    echo No new changes to commit.
 )
 
-echo Pushing to %BRANCH%...
-git push -u origin %BRANCH%
+:: === FORCED PUSH ===
+echo Forcing push to %BRANCH%...
+git push origin %BRANCH% --force
+
+if %errorlevel% neq 0 (
+    echo [ERROR] Push failed.
+    pause
+    exit /b 1
+)
 
 echo.
-echo === Upload complete ===
+echo === FORCE PUSH COMPLETE: Remote Tuna branch now matches local ===
 pause
 endlocal
