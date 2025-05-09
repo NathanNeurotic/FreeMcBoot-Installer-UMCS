@@ -1,12 +1,15 @@
 # Makefile for the FreeMcBoot Installer EE (Emotion Engine) application
 
 # Target ELF name parts
-EE_BIN_DIR = ./
+# EE_BIN_DIR is the output directory for the ELFs.
+# It's defined as './' here for local builds.
+# The GitHub Actions workflow (compile-core.yml) overrides this to EE_BIN_DIR=../installer_res/
+EE_BIN_DIR = ./ 
 EE_BIN_BASE_NAME = UNC_FMCBInstaller
 EE_BIN_PACKED_BASE_NAME = FMCBInstaller
 
-# exFAT support option (0 = no, 1 = yes)
-EXFAT ?= 0 # Default to 0 if not set externally
+# exFAT support option (0 = no, 1 = yes) - Can be overridden from command line, e.g., make EXFAT=1
+EXFAT ?= 0 # Default to 0 (no exFAT support) if not set externally
 
 # Determine suffix based on EXFAT option
 HAS_EXFAT =
@@ -14,7 +17,7 @@ ifeq ($(EXFAT), 1)
     HAS_EXFAT = _EXFAT
 endif
 
-# Final ELF names
+# Final ELF names. These will be placed in EE_BIN_DIR.
 EE_BIN = $(EE_BIN_DIR)$(EE_BIN_BASE_NAME)$(HAS_EXFAT).elf
 EE_BIN_PACKED = $(EE_BIN_DIR)$(EE_BIN_PACKED_BASE_NAME)$(HAS_EXFAT).elf
 
@@ -36,12 +39,12 @@ EE_OBJS = main.o iop.o UI.o menu.o libsecr.o pad.o system.o graphics.o ReqSpaceC
           $(EE_RES_OBJS) $(EE_IOP_OBJS) mctools_rpc.o
 
 # Include paths for EE compilation
-EE_INCS := -I$(PS2SDK)/ports/include \
+EE_INCS := -I. \
+           -I$(PS2SDK)/ports/include \
            -I$(PS2SDK)/ee/include \
            -I$(PS2SDK)/common/include \
            -I./irx/source/secrsif/src \
-           -I./irx/source/mctools/src/ \
-           -I. # Add current directory for project headers like main.h, UI.h etc.
+           -I./irx/source/mctools/src/
 
 # Linker flags for EE
 EE_LDFLAGS := -L$(PS2SDK)/ports/lib \
@@ -58,7 +61,8 @@ EE_GPVAL = -G8192
 
 # CFLAGS for EE compilation
 # -Os for size optimization, -mgpopt for GP optimization
-EE_CFLAGS += -Os -mgpopt $(EE_GPVAL)
+# Added -Wall for all warnings, -Wno-string-plus-int to suppress a common GCCism warning
+EE_CFLAGS += -Os -mgpopt $(EE_GPVAL) -Wall -Wno-string-plus-int
 
 # Conditional compilation for exFAT support
 ifeq ($(EXFAT), 1)
@@ -78,7 +82,7 @@ ifdef FMCB_INSTALLER_VERSION
     EE_CFLAGS += -DFMCB_INSTALLER_VERSION=\"$(FMCB_INSTALLER_VERSION)\"
 endif
 
-# Default rule to build all
+# Default rule to build all (now defaults to the packed version)
 all: $(EE_BIN_PACKED)
 
 # Rule to compile .c files to .o
@@ -94,22 +98,26 @@ all: $(EE_BIN_PACKED)
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
 # Rule to link EE objects into the final ELF
-$(EE_BIN) : $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
-	$(EE_CC) $(EE_CFLAGS) -nostartfiles $(EE_LDFLAGS) -o $(EE_BIN) $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o $(EE_LIBS)
+# Standard order: crt0.o, then your objects, then libraries.
+$(EE_BIN) : $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS)
+	$(EE_CC) $(EE_CFLAGS) -nostartfiles $(EE_LDFLAGS) -o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LIBS)
 
 # Rule to pack the ELF using ps2-packer
 $(EE_BIN_PACKED): $(EE_BIN)
-	@echo " -- Compressing ELF --"
+	@echo " -- Compressing ELF $(EE_BIN) -> $(EE_BIN_PACKED) --"
 	ps2-packer -v $< $@
 
 # Rule to clean compiled files
 clean:
 	@echo " -- Cleaning compiled files --"
 	rm -f $(EE_BIN) $(EE_BIN_PACKED) $(EE_OBJS) \
-	      *_irx.c background.c buttons.c IOPRP_img.c \
-	      usbmass_bd_irx.c bdm_irx.c bdmfs_fatfs_irx.c # Clean exFAT specific generated files too
+	      IOPRP_img.c IOMANX_irx.c FILEXIO_irx.c SIO2MAN_irx.c PADMAN_irx.c MCMAN_irx.c \
+	      MCSERV_irx.c SECRSIF_irx.c MCTOOLS_irx.c USBD_irx.c POWEROFF_irx.c DEV9_irx.c \
+	      ATAD_irx.c HDD_irx.c PFS_irx.c \
+	      background.c buttons.c \
+	      usbmass_bd_irx.c bdm_irx.c bdmfs_fatfs_irx.c USBHDFSD_irx.c # Clean all possible generated .c files
 
-# Rule to rebuild (clean then build)
+# Rule to rebuild (clean then build all)
 rebuild: clean all
 
 # Rules for converting binary resources/IRXs to C arrays using bin2c
@@ -152,10 +160,10 @@ USBD_irx.c: $(PS2SDK)/iop/irx/usbd.irx
 ATAD_irx.c: $(PS2SDK)/iop/irx/ps2atad.irx
 	bin2c $< $@ ATAD_irx
 
-HDD_irx.c: $(PS2SDK)/iop/irx/ps2hdd-osd.irx # Or ps2hdd.irx depending on SDK version/config
+HDD_irx.c: $(PS2SDK)/iop/irx/ps2hdd-osd.irx 
 	bin2c $< $@ HDD_irx
 
-PFS_irx.c: $(PS2SDK)/iop/irx/ps2fs.irx # Or pfsaux.irx / pfs.irx depending on SDK
+PFS_irx.c: $(PS2SDK)/iop/irx/ps2fs.irx 
 	bin2c $< $@ PFS_irx
 
 # Custom/Project-specific IRXs (from IRX_DIR)
@@ -165,7 +173,7 @@ SECRSIF_irx.c: $(IRX_DIR)/secrsif.irx
 MCTOOLS_irx.c: $(IRX_DIR)/mctools.irx
 	bin2c $< $@ MCTOOLS_irx
 
-IOPRP_img.c: $(IRX_DIR)/IOPRP.img # This is an IOP Reset Program image
+IOPRP_img.c: $(IRX_DIR)/IOPRP.img 
 	bin2c $< $@ IOPRP_img
 
 # Conditional IRX to C conversion based on EXFAT support

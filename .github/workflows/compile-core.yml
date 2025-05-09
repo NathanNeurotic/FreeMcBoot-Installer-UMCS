@@ -1,52 +1,123 @@
-name: Build [All]
+name: Build PS2 Exploits Installer
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual triggering
   push:
     paths:
       - 'installer/**'
       - 'installer_res/**'
       - '.github/workflows/compile-core.yml'
   schedule:
-    - cron: "0 15 1 * *"
+    - cron: "0 15 1 * *" # Runs at 3 PM UTC on the 1st of every month
 
 jobs:
   build-packages:
     runs-on: ubuntu-latest
-    container: ps2dev/ps2dev:v1.0
+    container: ps2dev/ps2dev:v1.0 # Uses a Docker container with PS2SDK pre-installed
+    
     steps:
-      - name: Install dependencies
-        run: apk add --no-cache build-base git zip p7zip
+      - name: Install build dependencies
+        run: apk add --no-cache build-base git zip p7zip tar # Added tar for .tar.gz
 
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Fetch all history for changelog generation
 
       - name: Generate build metadata
+        id: metadata
         run: |
           echo "SHA8=${GITHUB_SHA::8}" >> $GITHUB_ENV
+          # BUILD_TS will be YYYY-MM-DD_HH-MM-SS
           echo "BUILD_TS=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
+          # DATE_FLAT will be YYYY-MM-DD, used for the internal folder name by pack.sh
+          echo "DATE_FLAT=$(date +'%Y-%m-%d')" >> $GITHUB_ENV 
+          echo "::set-output name=sha8::${GITHUB_SHA::8}"
+          echo "::set-output name=build_ts::$(date +'%Y-%m-%d_%H-%M-%S')"
+          echo "::set-output name=date_flat::$(date +'%Y-%m-%d')"
 
-      - name: Compile
+      - name: Compile Installer ELFs
+        env:
+          FMCB_INSTALLER_VERSION: ${{ steps.metadata.outputs.sha8 }} # Pass SHA8 as version
         run: |
           cd installer
-          make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/
-          make rebuild FMCB_INSTALLER_VERSION=${{ env.SHA8 }} EE_BIN_DIR=../installer_res/ EXFAT=1
+          echo "Building standard ELF (output to ../installer_res/)..."
+          make rebuild EE_BIN_DIR=../installer_res/
+          echo "Building exFAT ELF (output to ../installer_res/)..."
+          make rebuild EE_BIN_DIR=../installer_res/ EXFAT=1
+          cd ..
 
-      - name: Prepare folder for Release
+      - name: Run pack.sh to create initial archives
+        env:
+          SHA8: ${{ steps.metadata.outputs.sha8 }} # Pass SHA8 to pack.sh for commit.txt
         run: |
           cd installer_res
           chmod +x ./pack.sh
-          ./pack.sh
-          mkdir -p ../release_artifacts
-          mv ../FMCB-1966.7z ../release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+          ./pack.sh # This script creates archives like ../FMCB-1966.7z
+          cd .. 
+          # The primary output we care about is FMCB-1966.7z, created in project root by pack.sh
 
-      - name: Upload artifact
+      - name: Prepare and Repackage Release
+        id: repackage
+        run: |
+          INITIAL_ARCHIVE_NAME="FMCB-1966.7z" # This is what pack.sh creates in project root for the main package
+          TEMP_EXTRACT_DIR="temp_extract_for_repack"
+          FINAL_CONTENT_DIR_BASENAME="OSDMenu-Installer" # pack.sh creates this folder name base for the 1966 version
+          FINAL_CONTENT_DIR="${FINAL_CONTENT_DIR_BASENAME}-${{ steps.metadata.outputs.date_flat }}" # e.g., OSDMenu-Installer-2025-05-09
+          
+          RELEASE_ARTIFACTS_DIR="release_artifacts"
+          mkdir -p ${RELEASE_ARTIFACTS_DIR}
+          
+          echo "Initial archive from pack.sh: ${INITIAL_ARCHIVE_NAME}"
+          if [ ! -f "${INITIAL_ARCHIVE_NAME}" ]; then
+            echo "Error: ${INITIAL_ARCHIVE_NAME} not found after pack.sh execution!"
+            exit 1
+          fi
+
+          echo "Creating temporary extraction directory: ${TEMP_EXTRACT_DIR}"
+          mkdir -p ${TEMP_EXTRACT_DIR}
+          cd ${TEMP_EXTRACT_DIR}
+          
+          echo "Extracting ${INITIAL_ARCHIVE_NAME}..."
+          7z x ../${INITIAL_ARCHIVE_NAME}
+          
+          if [ ! -d "${FINAL_CONTENT_DIR}" ]; then
+            echo "Error: Expected directory ${FINAL_CONTENT_DIR} not found after extraction!"
+            ls -la # List contents for debugging
+            exit 1
+          fi
+          
+          echo "Changing to content directory: ${FINAL_CONTENT_DIR}"
+          cd "${FINAL_CONTENT_DIR}"
+          
+          # Define new base name for repackaged archives
+          REPACK_BASE_NAME="PS2-Exploits-Installer-${{ steps.metadata.outputs.build_ts }}"
+          
+          echo "Creating .zip archive: ../../${RELEASE_ARTIFACTS_DIR}/${REPACK_BASE_NAME}.zip"
+          zip -r9 ../../${RELEASE_ARTIFACTS_DIR}/${REPACK_BASE_NAME}.zip .
+          
+          echo "Creating .7z archive: ../../${RELEASE_ARTIFACTS_DIR}/${REPACK_BASE_NAME}.7z"
+          7z a -t7z -mx=9 ../../${RELEASE_ARTIFACTS_DIR}/${REPACK_BASE_NAME}.7z .
+          
+          echo "Creating .tar.gz archive: ../../${RELEASE_ARTIFACTS_DIR}/${REPACK_BASE_NAME}.tar.gz"
+          tar -czvf ../../${RELEASE_ARTIFACTS_DIR}/${REPACK_BASE_NAME}.tar.gz .
+          
+          cd ../../ # Back to project root
+          rm -rf ${TEMP_EXTRACT_DIR} # Clean up temporary directory
+          
+          echo "Repackaging complete. New archives are in ${RELEASE_ARTIFACTS_DIR}/"
+          ls -la ${RELEASE_ARTIFACTS_DIR}/
+
+      - name: Upload Repackaged Artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: FMCB-${{ env.SHA8 }}
-          path: release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+          name: PS2-Exploits-Installer-${{ steps.metadata.outputs.sha8 }}
+          path: |
+            release_artifacts/PS2-Exploits-Installer-${{ steps.metadata.outputs.build_ts }}.zip
+            release_artifacts/PS2-Exploits-Installer-${{ steps.metadata.outputs.build_ts }}.7z
+            release_artifacts/PS2-Exploits-Installer-${{ steps.metadata.outputs.build_ts }}.tar.gz
+          retention-days: 7
 
       - name: Generate changelog since last tag
         id: changelog
@@ -61,20 +132,30 @@ jobs:
           else
             LOG_BODY="$(git log --pretty=format:"- %s (%h) by %an")"
           fi
+          
+          # Escape special characters for multiline JSON string
+          LOG_BODY="${LOG_BODY//'%'/'%25'}"
+          LOG_BODY="${LOG_BODY//$'\n'/'%0A'}"
+          LOG_BODY="${LOG_BODY//$'\r'/'%0D'}"
 
-          echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
-          echo "$LOG_BODY" >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+          echo "::set-output name=body::$LOG_BODY"
 
-      - name: Create release
-        uses: marvinpinto/action-automatic-releases@latest
+      - name: Create GitHub Release
+        if: success() # Only run if previous steps were successful
+        uses: marvinpinto/action-automatic-releases@latest # Or your preferred release action
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "OSDMenu"
+          automatic_release_tag: "Tuna-v${{ steps.metadata.outputs.build_ts }}" # Use a dynamic tag like Tuna-vYYYY-MM-DD_HH-MM-SS
           prerelease: true
-          title: "OSDMenu Installer"
+          title: "PS2 Exploits Installer (Build ${{ steps.metadata.outputs.build_ts }})"
           files: |
-            release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
+            release_artifacts/PS2-Exploits-Installer-${{ steps.metadata.outputs.build_ts }}.zip
+            release_artifacts/PS2-Exploits-Installer-${{ steps.metadata.outputs.build_ts }}.7z
+            release_artifacts/PS2-Exploits-Installer-${{ steps.metadata.outputs.build_ts }}.tar.gz
           body: |
+            Automated pre-release build.
+            Commit: ${{ steps.metadata.outputs.sha8 }}
+            Build Timestamp: ${{ steps.metadata.outputs.build_ts }}
+
             ### Recent Changes:
-            ${{ env.RELEASE_BODY }}
+            ${{ steps.changelog.outputs.body }}
