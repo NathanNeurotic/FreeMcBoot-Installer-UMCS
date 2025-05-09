@@ -42,7 +42,7 @@ EE_LIBS = -lgs -lpng -lz -lm -lfreetype -lpoweroff -lcdvd -lmc -lpadx -lhdd -lfi
 
 EE_GPVAL = -G8192
 
-EE_CFLAGS += -Os -mgpopt $(EE_GPVAL) -Wall -std=gnu99 # <<< ENSURE -std=gnu99 IS HERE
+EE_CFLAGS += -Os -mgpopt $(EE_GPVAL) -Wall -std=gnu99 # <<< ENSURED -std=gnu99 IS HERE
 
 ifeq ($(EXFAT), 1)
     EE_CFLAGS += -DEXFAT
@@ -121,7 +121,7 @@ SECRSIF_irx.c: $(IRX_DIR)/secrsif.irx
 	bin2c $< $@ SECRSIF_irx
 MCTOOLS_irx.c: $(IRX_DIR)/mctools.irx
 	bin2c $< $@ MCTOOLS_irx
-IOPRP_img.c: $(IRX_DIR)/IOPRP.img 
+IOPRP_img.c: $(IRX_DIR)/IOPRP_img
 	bin2c $< $@ IOPRP_img
 ifeq ($(EXFAT), 1)
 usbmass_bd_irx.c: $(IRX_DIR)/usbmass_bd.irx
