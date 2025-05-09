@@ -1,13 +1,13 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-// FMCB Installer version. Increment as needed.
-#define FMCB_INSTALLER_VERSION "1.001-MOD-OpenTuna" // Example version increment
+// FMCB Installer version will be defined by the Makefile via CFLAGS
+// #define FMCB_INSTALLER_VERSION "1.001-MOD-OpenTuna" // REMOVED THIS LINE
 
 /* Debugging TTY output - comment out to disable */
 // #define DEBUG_TTY_FEEDBACK 
 #ifdef DEBUG_TTY_FEEDBACK
-#include <sio.h>
+#include <sio.h> // For sio_printf
 #define DEBUG_PRINTF(args...) sio_printf(args)
 #else
 #define DEBUG_PRINTF(args...) (void)0

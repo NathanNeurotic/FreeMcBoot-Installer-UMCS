@@ -61,8 +61,8 @@ EE_GPVAL = -G8192
 
 # CFLAGS for EE compilation
 # -Os for size optimization, -mgpopt for GP optimization
-# Added -Wall for all warnings, -Wno-string-plus-int to suppress a common GCCism warning
-EE_CFLAGS += -Os -mgpopt $(EE_GPVAL) -Wall -Wno-string-plus-int
+# Removed -Wno-string-plus-int as it's not recognized by the ps2dev ee-gcc
+EE_CFLAGS += -Os -mgpopt $(EE_GPVAL) -Wall
 
 # Conditional compilation for exFAT support
 ifeq ($(EXFAT), 1)
