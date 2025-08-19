@@ -41,6 +41,7 @@ enum MAIN_MENU_ID {
     MAIN_MENU_ID_BTN_INST_FHDB,
     MAIN_MENU_ID_BTN_UINST_FHDB,
     MAIN_MENU_ID_BTN_FORMAT_HDD,
+    MAIN_MENU_ID_BTN_INSTALL_OPENTUNA,
     MAIN_MENU_ID_DESCRIPTION,
     MAIN_MENU_ID_VERSION,
 };
@@ -84,6 +85,9 @@ static struct UIMenuItem MainMenuItems[] = {
     {MITEM_BREAK},
     {MITEM_BREAK},
     {MITEM_BUTTON, MAIN_MENU_ID_BTN_DOWNGRADE_MI, MITEM_FLAG_POS_MID, 0, 24, 0, 0, SYS_UI_LBL_UMI},
+    {MITEM_BREAK},
+    {MITEM_BREAK},
+    {MITEM_BUTTON, MAIN_MENU_ID_BTN_INSTALL_OPENTUNA, MITEM_FLAG_POS_MID, 0, 24, 0, 0, SYS_UI_LBL_INSTALL_OPENTUNA},
     {MITEM_BREAK},
     {MITEM_BREAK},
     {MITEM_BUTTON, MAIN_MENU_ID_BTN_EXIT, MITEM_FLAG_POS_MID, 0, 24, 0, 0, SYS_UI_LBL_EXIT},
@@ -336,6 +340,9 @@ static int MainMenuUpdateCallback(struct UIMenu *menu, unsigned short int frame,
                 case MAIN_MENU_ID_BTN_FORMAT_HDD:
                     UISetString(menu, MAIN_MENU_ID_DESCRIPTION, GetUIString(SYS_UI_MSG_DSC_FORMAT_HDD));
                     break;
+                case MAIN_MENU_ID_BTN_INSTALL_OPENTUNA:
+                    UISetString(menu, MAIN_MENU_ID_DESCRIPTION, GetUIString(SYS_UI_MSG_DSC_INSTALL_OPENTUNA));
+                    break;
                 case MAIN_MENU_ID_BTN_EXIT:
                     UISetString(menu, MAIN_MENU_ID_DESCRIPTION, GetUIString(SYS_UI_MSG_DSC_QUIT));
                     break;
@@ -424,6 +431,9 @@ void MainMenu(void)
                 break;
             case MAIN_MENU_ID_BTN_INST_CROSS_PSX:
                 event = EVENT_INSTALL_CROSS_PSX;
+                break;
+            case MAIN_MENU_ID_BTN_INSTALL_OPENTUNA:
+                event = EVENT_INSTALL_OPENTUNA;
                 break;
             default: // MAIN_MENU_ID_BTN_EXIT
                 event = EVENT_EXIT;
@@ -749,6 +759,9 @@ void MainMenu(void)
                     if (hddFormat() != 0)
                         DisplayErrorMessage(SYS_UI_MSG_FORMAT_HDD_FAILED);
                 }
+                break;
+            case EVENT_INSTALL_OPENTUNA:
+                DisplayInfoMessage(SYS_UI_MSG_DSC_INSTALL_OPENTUNA);
                 break;
             case EVENT_EXIT:
                 if (DisplayPromptMessage(SYS_UI_MSG_QUIT, SYS_UI_LBL_CANCEL, SYS_UI_LBL_OK) == 2)

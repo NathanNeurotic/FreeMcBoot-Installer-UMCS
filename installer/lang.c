@@ -68,7 +68,9 @@ static const char *DefaultLanguageStringTable[SYS_UI_MSG_COUNT] = {
     "Failed to format the HardDisk Drive (HDD) unit.",
     "Format the HardDisk Drive (HDD) unit?\nWarning: All data will be erased.",
     "Format HDD and create basic partitions",
-    "The installer has detected that your console is a very rare unit\nIf you want to colaborate with the homebrew PS2 comunity please contact me: \n\nhttps://github.com/israpps"};
+    "The installer has detected that your console is a very rare unit\nIf you want to colaborate with the homebrew PS2 comunity please contact me: \n\nhttps://github.com/israpps",
+    "Install the OpenTuna exploit.",
+};
 
 static const char *DefaultLanguageLabelStringTable[SYS_UI_LBL_COUNT] = {
     "OK",
@@ -108,6 +110,7 @@ static const char *DefaultLanguageLabelStringTable[SYS_UI_LBL_COUNT] = {
     "Install PS2BBL (PSX/DESR)",
     "Install PS2BBL-HDD",
     "Uninstall Existing System Updates",
+    "Install OpenTuna",
     "Exit",
     "B",
     "KB",
