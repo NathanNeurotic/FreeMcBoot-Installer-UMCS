@@ -328,10 +328,10 @@ static struct FileAlias FileAlias[NUM_CROSSLINKED_FILES] = {
 
 static char MGFolderRegion, PS2SystemType;
 static unsigned short int ROMVersion;
-static char SysExecFolder[] = "BREXEC-SYSTEM"; // Read above.
-static char PSXSysExecFolder[] = "BIEXEC-SYSTEM";
-static char SysExecFile[12]; /* E.g. "osdmain.elf" or "osd110.elf" */
-static char romver[16];
+char SysExecFolder[] = "BREXEC-SYSTEM"; // Read above.
+char PSXSysExecFolder[] = "BIEXEC-SYSTEM";
+char SysExecFile[12]; /* E.g. "osdmain.elf" or "osd110.elf" */
+char romver[16];
 
 static int InitMCInfo(int port, int slot)
 {
