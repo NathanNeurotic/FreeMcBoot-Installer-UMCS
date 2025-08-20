@@ -48,23 +48,23 @@ jobs:
           name: FMCB-${{ env.SHA8 }}
           path: release_artifacts/OSDMenu-Installer-${{ env.BUILD_TS }}.7z
 
-      - name: Generate changelog since last tag
-        id: changelog
-        run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          LAST_TAG=$(git describe --tags --abbrev=0 || echo "")
-          echo "Last tag was: $LAST_TAG"
-
-          LOG_BODY=""
-          if [ -n "$LAST_TAG" ]; then
-            LOG_BODY="$(git log $LAST_TAG..HEAD --pretty=format:"- %s (%h) by %an")"
-          else
-            LOG_BODY="$(git log --pretty=format:"- %s (%h) by %an")"
-          fi
-
-          echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
-          echo "$LOG_BODY" >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+#      - name: Generate changelog since last tag
+#        id: changelog
+#        run: |
+#          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+#          LAST_TAG=$(git describe --tags --abbrev=0 || echo "")
+#          echo "Last tag was: $LAST_TAG"
+#
+#          LOG_BODY=""
+#          if [ -n "$LAST_TAG" ]; then
+#            LOG_BODY="$(git log $LAST_TAG..HEAD --pretty=format:"- %s (%h) by %an")"
+#          else
+#            LOG_BODY="$(git log --pretty=format:"- %s (%h) by %an")"
+#         fi
+#
+#          echo 'RELEASE_BODY<<EOF' >> $GITHUB_ENV
+#          echo "$LOG_BODY" >> $GITHUB_ENV
+#          echo 'EOF' >> $GITHUB_ENV
 
 #      - name: Create release
 #        uses: marvinpinto/action-automatic-releases@latest
