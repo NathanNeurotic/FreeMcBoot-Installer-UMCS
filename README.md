@@ -1,3 +1,5 @@
+# THIS BRANCH IS FOR MY WORK - NONE OF THE README IS ACCURATE. WAIT FOR OFFICIAL RELEASES.
+
 [![Downloads](https://img.shields.io/github/downloads/NathanNeurotic/FreeMcBoot-Installer-UMCS/OSDMenu/total?color=purple&label=Downloads&style=flat)](https://github.com/NathanNeurotic/FreeMcBoot-Installer-UMCS/releases/tag/OSDMenu)
 
 # OSDMenu Installer (Not UMCS or FMCB)
