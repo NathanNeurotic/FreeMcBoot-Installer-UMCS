@@ -22,6 +22,7 @@ enum MainMenuEvents {
     EVENT_INSTALL_CROSS_PSX,
     EVENT_FORMAT_HDD,
     EVENT_INSTALL_OPENTUNA,
+    EVENT_UNINSTALL_OPENTUNA,
     EVENT_EXIT,
     EVENT_OPTION_COUNT /* The number of valid events. */
 };

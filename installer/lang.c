@@ -70,6 +70,7 @@ static const char *DefaultLanguageStringTable[SYS_UI_MSG_COUNT] = {
     "Format HDD and create basic partitions",
     "The installer has detected that your console is a very rare unit\nIf you want to colaborate with the homebrew PS2 comunity please contact me: \n\nhttps://github.com/israpps",
     "Install the OpenTuna exploit.",
+    "Uninstall the OpenTuna exploit.",
 };
 
 static const char *DefaultLanguageLabelStringTable[SYS_UI_LBL_COUNT] = {
@@ -111,6 +112,7 @@ static const char *DefaultLanguageLabelStringTable[SYS_UI_LBL_COUNT] = {
     "Install PS2BBL-HDD",
     "Uninstall Existing System Updates",
     "Install OpenTuna",
+    "Uninstall OpenTuna",
     "Exit",
     "B",
     "KB",

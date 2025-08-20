@@ -96,7 +96,6 @@ struct WorkerThreadMcMaintParams
 };
 
 /* Function prototypes */
-extern char romver[16];
 int GetBootDeviceID(void);
 int GetConsoleRegion(void);
 int GetConsoleVMode(void);

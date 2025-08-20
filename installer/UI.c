@@ -1333,7 +1333,7 @@ int UIExecMenu(struct UIMenu *FirstMenu, short int SelectedItem, struct UIMenu *
             }
         } else if (PadStatus & CancelButton) {
             // User aborted.
-            result = 1;
+            result = 0;
             break;
         }
 

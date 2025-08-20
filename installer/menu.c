@@ -41,13 +41,13 @@ enum MAIN_MENU_ID {
     MAIN_MENU_ID_BTN_INST_FHDB,
     MAIN_MENU_ID_BTN_UINST_FHDB,
     MAIN_MENU_ID_BTN_FORMAT_HDD,
-    MAIN_MENU_ID_BTN_INSTALL_OPENTUNA,
     MAIN_MENU_ID_DESCRIPTION,
     MAIN_MENU_ID_VERSION,
 };
 
 enum OPENTUNA_MENU_ID {
     OPENTUNA_MENU_ID_BTN_INSTALL = 1,
+    OPENTUNA_MENU_ID_BTN_UNINSTALL,
     OPENTUNA_MENU_ID_ROM_VERSION,
     OPENTUNA_MENU_ID_STATUS_TEXT,
 };
@@ -91,9 +91,6 @@ static struct UIMenuItem MainMenuItems[] = {
     {MITEM_BREAK},
     {MITEM_BREAK},
     {MITEM_BUTTON, MAIN_MENU_ID_BTN_DOWNGRADE_MI, MITEM_FLAG_POS_MID, 0, 24, 0, 0, SYS_UI_LBL_UMI},
-    {MITEM_BREAK},
-    {MITEM_BREAK},
-    {MITEM_BUTTON, MAIN_MENU_ID_BTN_INSTALL_OPENTUNA, MITEM_FLAG_POS_MID, 0, 24, 0, 0, SYS_UI_LBL_INSTALL_OPENTUNA},
     {MITEM_BREAK},
     {MITEM_BREAK},
     {MITEM_BUTTON, MAIN_MENU_ID_BTN_EXIT, MITEM_FLAG_POS_MID, 0, 24, 0, 0, SYS_UI_LBL_EXIT},
@@ -159,15 +156,18 @@ static struct UIMenuItem OpenTunaMenuItems[] = {
     {MITEM_SEPERATOR},
     {MITEM_BREAK},
 
-    {MITEM_STRING, OPENTUNA_MENU_ID_ROM_VERSION, MITEM_FLAG_READONLY},
+    {MITEM_BUTTON, OPENTUNA_MENU_ID_BTN_INSTALL, MITEM_FLAG_POS_MID, 0, 24, 0, 0, SYS_UI_LBL_INSTALL_OPENTUNA},
     {MITEM_BREAK},
     {MITEM_BREAK},
+    {MITEM_BUTTON, OPENTUNA_MENU_ID_BTN_UNINSTALL, MITEM_FLAG_POS_MID, 0, 24, 0, 0, SYS_UI_LBL_UNINSTALL_OPENTUNA},
+    {MITEM_BREAK},
+    {MITEM_BREAK},
+
     {MITEM_STRING, OPENTUNA_MENU_ID_STATUS_TEXT, MITEM_FLAG_READONLY},
     {MITEM_BREAK},
     {MITEM_BREAK},
 
-    {MITEM_BUTTON, OPENTUNA_MENU_ID_BTN_INSTALL, MITEM_FLAG_POS_MID, 0, 24, 0, 0, SYS_UI_LBL_INSTALL},
-    {MITEM_BREAK},
+    {MITEM_STRING, OPENTUNA_MENU_ID_ROM_VERSION, MITEM_FLAG_POS_ABS | MITEM_FLAG_READONLY, 0, 0, 520, 420},
     {MITEM_BREAK},
 
     {MITEM_TERMINATOR}};
@@ -239,12 +239,13 @@ static struct UIMenuItem InsuffSpaceScreenItems[] = {
 // Forward declarations
 static struct UIMenu InstallMainMenu;
 static struct UIMenu ExtraMenu;
+static struct UIMenu MCMenu;
 static struct UIMenu OpenTunaMenu;
 
-static struct UIMenu MCMenu = {NULL, &ExtraMenu, MCMenuItems, {{BUTTON_TYPE_SYS_SELECT, SYS_UI_LBL_OK}, {BUTTON_TYPE_SYS_CANCEL, SYS_UI_LBL_EXIT}}};
+static struct UIMenu MCMenu = {&OpenTunaMenu, &ExtraMenu, MCMenuItems, {{BUTTON_TYPE_SYS_SELECT, SYS_UI_LBL_OK}, {BUTTON_TYPE_SYS_CANCEL, SYS_UI_LBL_EXIT}}};
 static struct UIMenu ExtraMenu = {&MCMenu, &InstallMainMenu, ExtraMenuItems, {{BUTTON_TYPE_SYS_SELECT, SYS_UI_LBL_OK}, {BUTTON_TYPE_SYS_CANCEL, SYS_UI_LBL_EXIT}}};
-static struct UIMenu OpenTunaMenu = {&InstallMainMenu, NULL, OpenTunaMenuItems, {{BUTTON_TYPE_SYS_SELECT, SYS_UI_LBL_OK}, {BUTTON_TYPE_SYS_CANCEL, SYS_UI_LBL_BACK}}};
 static struct UIMenu InstallMainMenu = {&ExtraMenu, &OpenTunaMenu, MainMenuItems, {{BUTTON_TYPE_SYS_SELECT, SYS_UI_LBL_OK}, {BUTTON_TYPE_SYS_CANCEL, SYS_UI_LBL_EXIT}}};
+static struct UIMenu OpenTunaMenu = {&InstallMainMenu, &MCMenu, OpenTunaMenuItems, {{BUTTON_TYPE_SYS_SELECT, SYS_UI_LBL_OK}, {BUTTON_TYPE_SYS_CANCEL, SYS_UI_LBL_BACK}}};
 
 static struct UIMenu ProgressScreen = {NULL, NULL, ProgressScreenItems, {{BUTTON_TYPE_SYS_CANCEL, SYS_UI_LBL_CANCEL}, {-1, -1}}};
 static struct UIMenu InsuffSpaceScreen = {NULL, NULL, InsuffSpaceScreenItems, {{BUTTON_TYPE_SYS_SELECT, SYS_UI_LBL_OK}, {-1, -1}}};
@@ -328,8 +329,34 @@ static int CheckFormat(void)
     return status;
 }
 
+static int OpenTunaMenuUpdateCallback(struct UIMenu *menu, unsigned short int frame, int selection, u32 padstatus)
+{
+    if ((padstatus != 0) || (frame == 0)) {
+        if (selection >= 0) {
+            switch (menu->items[selection].id) {
+                case OPENTUNA_MENU_ID_BTN_INSTALL:
+                    UISetString(menu, OPENTUNA_MENU_ID_STATUS_TEXT, GetUIString(SYS_UI_MSG_DSC_INSTALL_OPENTUNA));
+                    break;
+                case OPENTUNA_MENU_ID_BTN_UNINSTALL:
+                    UISetString(menu, OPENTUNA_MENU_ID_STATUS_TEXT, GetUIString(SYS_UI_MSG_DSC_UNINSTALL_OPENTUNA));
+                    break;
+                default:
+                    UISetString(menu, OPENTUNA_MENU_ID_STATUS_TEXT, NULL);
+                    break;
+            }
+        } else {
+             UISetString(menu, OPENTUNA_MENU_ID_STATUS_TEXT, NULL);
+        }
+    }
+    return 0;
+}
+
 static int MainMenuUpdateCallback(struct UIMenu *menu, unsigned short int frame, int selection, u32 padstatus)
 {
+    if (menu == &OpenTunaMenu) {
+        return OpenTunaMenuUpdateCallback(menu, frame, selection, padstatus);
+    }
+
     if ((padstatus != 0) || (frame == 0)) {
         if (selection >= 0) {
             switch (menu->items[selection].id) {
@@ -366,9 +393,6 @@ static int MainMenuUpdateCallback(struct UIMenu *menu, unsigned short int frame,
                 case MAIN_MENU_ID_BTN_FORMAT_HDD:
                     UISetString(menu, MAIN_MENU_ID_DESCRIPTION, GetUIString(SYS_UI_MSG_DSC_FORMAT_HDD));
                     break;
-                case MAIN_MENU_ID_BTN_INSTALL_OPENTUNA:
-                    UISetString(menu, MAIN_MENU_ID_DESCRIPTION, GetUIString(SYS_UI_MSG_DSC_INSTALL_OPENTUNA));
-                    break;
                 case MAIN_MENU_ID_BTN_EXIT:
                     UISetString(menu, MAIN_MENU_ID_DESCRIPTION, GetUIString(SYS_UI_MSG_DSC_QUIT));
                     break;
@@ -380,71 +404,6 @@ static int MainMenuUpdateCallback(struct UIMenu *menu, unsigned short int frame,
     }
 
     return 0;
-}
-
-static int OpenTunaUpdateCallback(struct UIMenu *menu, unsigned short int frame, int selection, u32 padstatus)
-{
-    if ((padstatus != 0) || (frame == 0)) {
-        if (selection >= 0) {
-            switch (menu->items[selection].id) {
-                case OPENTUNA_MENU_ID_BTN_INSTALL:
-                    UISetString(menu, OPENTUNA_MENU_ID_STATUS_TEXT, GetUIString(SYS_UI_MSG_DSC_INST_FMCB));
-                    break;
-                default:
-                    UISetString(menu, OPENTUNA_MENU_ID_STATUS_TEXT, NULL);
-            }
-        } else
-            UISetString(menu, OPENTUNA_MENU_ID_STATUS_TEXT, NULL);
-    }
-
-    return 0;
-}
-
-void OpenTunaInstaller(void)
-{
-    short int option;
-    struct UIMenu *CurrentMenu;
-    unsigned char McPort;
-    struct McData McData[2];
-
-    memset(McData, 0, sizeof(McData));
-
-    CurrentMenu = &OpenTunaMenu;
-    option = 0;
-
-    UpdateRegionalPaths();
-    UISetString(CurrentMenu, OPENTUNA_MENU_ID_ROM_VERSION, romver);
-
-    while (1) {
-        option = UIExecMenu(CurrentMenu, option, &CurrentMenu, &OpenTunaUpdateCallback);
-
-        McPort = GetNumMemcardsInserted(McData);
-
-        switch(option)
-        {
-            case OPENTUNA_MENU_ID_BTN_INSTALL:
-                if (McPort > 1) {
-                    McPort = DisplayPromptMessage(SYS_UI_MSG_MULTIPLE_CARDS, SYS_UI_LBL_SLOT1, SYS_UI_LBL_SLOT2);
-                    if (McPort == 0)
-                        break;
-                    McPort--;
-                } else if (McPort == 0) {
-                    DisplayErrorMessage(SYS_UI_MSG_NO_CARDS);
-                    break;
-                } else
-                    McPort = (McData[0].Type == MC_TYPE_PS2) ? 0 : 1;
-
-                unsigned int requiredSpace = 1024; // 1MB in KB
-                if((unsigned int)McData[McPort].SpaceFree < requiredSpace)
-                {
-                    DisplayOutOfSpaceMessage(McData[McPort].SpaceFree * 1024, requiredSpace * 1024);
-                    break;
-                }
-                break;
-            default: // Exit
-                return;
-        }
-    }
 }
 
 void MainMenu(void)
@@ -482,6 +441,9 @@ void MainMenu(void)
     option = 0;
 
     DrawMenuEntranceSlideInMenuAnimation(0);
+
+    UpdateRegionalPaths();
+    UISetString(&OpenTunaMenu, OPENTUNA_MENU_ID_ROM_VERSION, romver);
 
     /* Main loop */
     while (!done) {
@@ -523,8 +485,11 @@ void MainMenu(void)
             case MAIN_MENU_ID_BTN_INST_CROSS_PSX:
                 event = EVENT_INSTALL_CROSS_PSX;
                 break;
-            case MAIN_MENU_ID_BTN_INSTALL_OPENTUNA:
+            case OPENTUNA_MENU_ID_BTN_INSTALL:
                 event = EVENT_INSTALL_OPENTUNA;
+                break;
+            case OPENTUNA_MENU_ID_BTN_UNINSTALL:
+                event = EVENT_UNINSTALL_OPENTUNA;
                 break;
             default: // MAIN_MENU_ID_BTN_EXIT
                 event = EVENT_EXIT;
@@ -533,6 +498,29 @@ void MainMenu(void)
         UITransition(CurrentMenu, UIMT_LEFT_OUT, option);
 
         switch (event) {
+            case EVENT_INSTALL_OPENTUNA:
+                if (McPort > 1) {
+                    McPort = DisplayPromptMessage(SYS_UI_MSG_MULTIPLE_CARDS, SYS_UI_LBL_SLOT1, SYS_UI_LBL_SLOT2);
+                    if (McPort == 0)
+                        break;
+                    McPort--;
+                } else if (McPort == 0) {
+                    DisplayErrorMessage(SYS_UI_MSG_NO_CARDS);
+                    break;
+                } else
+                    McPort = (McData[0].Type == MC_TYPE_PS2) ? 0 : 1;
+
+                unsigned int requiredSpace = 1024; // 1MB in KB
+                if((unsigned int)McData[McPort].SpaceFree < requiredSpace)
+                {
+                    DisplayOutOfSpaceMessage(McData[McPort].SpaceFree * 1024, requiredSpace * 1024);
+                    break;
+                }
+                DisplayInfoMessage(SYS_UI_MSG_INSTALL_COMPLETE);
+                break;
+            case EVENT_UNINSTALL_OPENTUNA:
+                DisplayInfoMessage(SYS_UI_MSG_CLEANUP_COMPLETE);
+                break;
             case EVENT_MULTI_INSTALL:
                 if (ShowMessageBox(SYS_UI_LBL_CANCEL, SYS_UI_LBL_OK, -1, -1, GetUIString(SYS_UI_MSG_MULTI_WARN), SYS_UI_LBL_WARNING) <= 1)
                     break;
@@ -851,14 +839,14 @@ void MainMenu(void)
                         DisplayErrorMessage(SYS_UI_MSG_FORMAT_HDD_FAILED);
                 }
                 break;
-            case EVENT_INSTALL_OPENTUNA:
-                OpenTunaInstaller();
-                break;
             case EVENT_EXIT:
                 if (DisplayPromptMessage(SYS_UI_MSG_QUIT, SYS_UI_LBL_CANCEL, SYS_UI_LBL_OK) == 2)
                     done = 1;
                 break;
         }
+
+        if(option > 0)
+            option = 0;
 
         if (!done)
             UITransition(CurrentMenu, UIMT_LEFT_IN, option);
